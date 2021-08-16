@@ -2,7 +2,7 @@
 import threading
 import socket
 from cv2 import waitKey
-from time import time
+import time
 
 
 class DroneServer:
@@ -36,12 +36,15 @@ class DroneServer:
                     print("{} packet not received !!".format(self.host_name))
                     continue
                 lat, lng = packet.decode(encoding='utf-8').split(sep='/')
-                print(lat, lng)
 
+                dst_lat, dst_lng, command = 45.0, 45.0, 1
+
+                packet = str(dst_lat) + '/' + str(dst_lng) + '/' + str(command)
+                conn.sendall((str(len(packet))).encode().ljust(8) + packet.encode())
+
+                print(lat, lng, dst_lat, dst_lng)
                 # TODO : Send to DataQueue Web/APP
-
-
-                waitKey(100)
+                time.sleep(0.5)
 
 
             except Exception as e:
