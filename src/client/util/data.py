@@ -1,4 +1,4 @@
-from src.client.util.singleton import Singleton
+from .singleton import Singleton
 # from threading import Lock
 
 
