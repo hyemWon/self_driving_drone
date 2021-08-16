@@ -18,8 +18,6 @@ class SeekPro:
     """
     def __init__(self):
         # seek comapct pro usb info : idVender = 0x289d, idProduct = 0x0011
-        self.dev = usb.core.find(idVendor=0x289d, idProduct=0x0011)
-
         self.codes = {
             # Address enum
             'READ_CHIP_ID': 54,  # 0x36
@@ -35,6 +33,12 @@ class SeekPro:
             'SET_FIRMWARE_INFO_FEATURES': 85,   # 0x55
             'SET_FACTORY_SETTINGS_FEATURES': 86  # 0x56
         }
+
+        self.width = 320
+        self.height = 240
+        self.raw_width = 342
+        self.raw_height = 260
+        self.dev = usb.core.find(idVendor=0x289d, idProduct=0x0011)
 
         if not self.dev:
             raise IOError('Device not found')
@@ -55,11 +59,6 @@ class SeekPro:
                 self.dead_pixels = self.get_dead_pix_list(ret)
                 break
 
-
-        self.width = 320
-        self.height = 240
-        self.raw_width = 342
-        self.raw_height = 260
 
     def get_dead_pix_list(self, data):
         """
