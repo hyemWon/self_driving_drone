@@ -46,7 +46,6 @@ class DroneServer:
                 # TODO : Send to DataQueue Web/APP
                 time.sleep(0.5)
 
-
             except Exception as e:
                 self.isRun = False
                 print(e)

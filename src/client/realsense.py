@@ -29,6 +29,9 @@ class RealSenseClient:
         self.config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
         self.config.enable_stream(rs.stream.color, width, height, rs.format.bgr8, fps)
 
+        self.pipeline.start(self.config)
+        self.pipeline.wait_for_frames()
+
         self.isRun = True
         t = threading.Thread(target=self.thread)
         t.daemon = True
