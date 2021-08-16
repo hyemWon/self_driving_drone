@@ -18,7 +18,7 @@ class RealSenseClient:
 
         self.wrapper = rs.pipeline_wrapper(self.pipeline)
         self.profile = self.config.resolve(self.wrapper)
-        self.device = self.profile.getdevice()
+        self.device = self.profile.get_device()
         self.device_name = str(self.device.get_info(rs.camera_info.product_line))
 
         self.isRun = False
