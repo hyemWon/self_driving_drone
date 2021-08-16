@@ -56,22 +56,24 @@ class DroneClient:
                 # send drone data to server
                 packet_send = str(lat_drone) + '/' + str(lng_drone)
 
-                print('#D.S# sending drone data to server')
+                # print('#D.S# sending drone data to server')
                 self.sock.sendall((str(len(packet_send))).encode().ljust(8) + packet_send.encode())
 
                 # recv app data from server
-                print('#D.S# receiving drone data from server')
-                header = self.sock.recv(8)
-                packet_recv = self.recvall(len(header))
+                # print('#D.S# receiving drone data from server')
+                header = self.recvall(8)
+                packet_recv = self.recvall(int(header))
                 lat_dst, lng_dst, control_mode = packet_recv.decode(encoding='utf-8').split(sep='/')
 
                 self.lock.acquire()
-                self.data.lat_dst = lat_dst
-                self.data.lng_dst = lng_dst
+                self.data.lat_dst = float(lat_dst)
+                self.data.lng_dst = float(lng_dst)
+                self.data.control_mode = int(control_mode)
                 self.lock.release()
 
                 time.sleep(1)
-                print('#D.S# process finished {}'.format(self.host_name, time.time() - st))
+                print('#D.S# socket job finished {}'.format(self.host_name, time.time() - st))
+
             except Exception as e:
                 self.isRunSocket = False
                 print(e)
@@ -95,10 +97,10 @@ class DroneClient:
         st = time.time()
 
         self.lock.acquire()
-        self.data.lng_dst += 1
+        self.data.lng_drone += 1.0
         lng = self.data.lng_drone
 
-        self.data.lat_drone += 1
+        self.data.lat_drone += 1.0
         lat = self.data.lat_drone
 
         dst_lat = self.data.lat_dst

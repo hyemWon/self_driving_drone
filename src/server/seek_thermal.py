@@ -36,7 +36,10 @@ class SeekThermalServer:
                 data = np.fromstring(stringData, dtype='uint8')     # convert to numpy array
 
                 frame = cv2.imdecode(data, cv2.IMREAD_COLOR)
-                cv2.imshow('Frame', frame)
+                mini = frame.min()  # min pixel data
+                maxi = frame.max()  # max pixel data
+
+                cv2.imshow('Seek thermal frame ', (np.clip(frame - mini, 0, maxi - mini) / (maxi - mini) * 255.).astype(np.uint8))
 
                 # TODO: Add Image Processor
 
