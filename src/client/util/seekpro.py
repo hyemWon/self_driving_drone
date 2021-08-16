@@ -19,9 +19,26 @@ class SeekPro:
     def __init__(self):
         # seek comapct pro usb info : idVender = 0x289d, idProduct = 0x0011
         self.dev = usb.core.find(idVendor=0x289d, idProduct=0x0011)
+
+        self.codes = {
+            # Address enum
+            'READ_CHIP_ID': 54,  # 0x36
+            'START_GET_IMAGE_TRANSFER': 83,     # 0x53
+
+            'GET_OPERATION_MODE': 61,       # 0x3D
+            'GET_IMAGE_PROCESSING_MODE': 63,    # 0x3F
+            'GET_FIRMWARE_INFO': 78,        # 0x4E
+            'GET_FACTORY_SETTINGS': 88,     # 0x58
+
+            'SET_OPERATION_MODE': 60,       # 0x3C
+            'SET_IMAGE_PROCESSING_MODE': 62,    # 0x3E
+            'SET_FIRMWARE_INFO_FEATURES': 85,   # 0x55
+            'SET_FACTORY_SETTINGS_FEATURES': 86  # 0x56
+        }
+
         if not self.dev:
             raise IOError('Device not found')
-        print(self.dev)
+
         self.dev.set_configuration()
         self.calib = None
         for i in range(5):
@@ -38,21 +55,6 @@ class SeekPro:
                 self.dead_pixels = self.get_dead_pix_list(ret)
                 break
 
-        self.codes = {
-            # Address enum
-            'READ_CHIP_ID' : 54,  # 0x36
-            'START_GET_IMAGE_TRANSFER' : 83,  # 0x53
-
-            'GET_OPERATION_MODE' : 61,  # 0x3D
-            'GET_IMAGE_PROCESSING_MODE' : 63,  # 0x3F
-            'GET_FIRMWARE_INFO' : 78,  # 0x4E
-            'GET_FACTORY_SETTINGS' : 88,  # 0x58
-
-            'SET_OPERATION_MODE' : 60,  # 0x3C
-            'SET_IMAGE_PROCESSING_MODE' : 62, # 0x3E
-            'SET_FIRMWARE_INFO_FEATURES' : 85, # 0x55
-            'SET_FACTORY_SETTINGS_FEATURES' : 86,  # 0x56
-        }
 
         self.width = 320
         self.height = 240
