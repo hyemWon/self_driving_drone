@@ -34,10 +34,7 @@ class SeekThermalClient:
             try:
                 while True:
                     frame = self.cam.get_image()
-
-                    data = np.asanyarray(frame)
-
-                    res, encode_frame = cv2.imencode('.jpg', data, encode_frame)
+                    res, encode_frame = cv2.imencode('.jpg', frame, encode_frame)
                     string_data = np.array(encode_frame).tostring()
 
                     self.sock.sendall((str(len(string_data))).encode().ljust(8) + string_data)
