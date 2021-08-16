@@ -183,6 +183,7 @@ class SeekPro:
 
         return (np.clip(img-mini, 0, maxi-mini)/(maxi-mini)*255.).astype(np.uint8)
 
+
 if __name__ == '__main__':
     cam = SeekPro()
 

@@ -1,8 +1,8 @@
-import pyrealsense2 as rs
 import numpy as np
 import cv2
 import threading
 import socket
+import time
 
 
 class RealSenseServer:
@@ -28,9 +28,8 @@ class RealSenseServer:
 
         while self.isRun:
             try:
-                print("Start Receiving Frame")
-                # st = time.time()
-                # client에서 받은 stringData의 크기 (==(str(len(stringData))).encode().ljust(16))
+                st = time.time()
+
                 length = self.recvall(conn, 8)                      # Receive packet length
                 stringData = self.recvall(conn, int(length))        # receive real data
                 data = np.fromstring(stringData, dtype='uint8')     # convert to numpy array
@@ -43,6 +42,7 @@ class RealSenseServer:
                 # TODO: Send to DataQueue
 
                 cv2.waitKey(1)
+                print("#RS# process finished")
 
             except Exception as e:
                 self.isRun = False
