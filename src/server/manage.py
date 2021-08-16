@@ -7,7 +7,7 @@ from src.server.controller import gmap, user
 
 class ManageServer:
     def __init__(self):
-        # self.rs_server = RealSenseServer()
+        self.rs_server = RealSenseServer()
         self.seek_thermal_server = SeekThermalServer()
         self.drone_server = DroneServer()
         # TODO : add flask
@@ -16,7 +16,7 @@ class ManageServer:
         self.app.register_blueprint(user.blue_user)
 
     def run(self):
-        # self.rs_server.run()
+        self.rs_server.run()
         self.seek_thermal_server.run()
         self.drone_server.run()
 

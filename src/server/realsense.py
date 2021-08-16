@@ -12,19 +12,9 @@ class RealSenseServer:
         self.port = 8485
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-        self.pipeline = rs.pipeline()
-        self.config = rs.config()
-
-        self.wrapper = rs.pipeline_wrapper(self.pipeline)
-        self.profile = self.config.resolve(self.wrapper)
-        self.device = self.profile.getdevice()
-        self.device_name = str(self.device.get_info(rs.camera_info.product_line))
-
         self.isRun = False
 
     def run(self):
-        # depth setting
-        self.config.enable_stream()
         t = threading.Thread(target=self.thread)
         t.daemon = True
         self.isRun = True

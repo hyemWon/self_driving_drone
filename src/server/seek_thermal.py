@@ -36,7 +36,7 @@ class SeekThermalServer:
                 data = np.fromstring(stringData, dtype='uint8')     # convert to numpy array
 
                 frame = cv2.imdecode(data, cv2.IMREAD_COLOR)
-                # cv2.imshow('Frame', frame)
+                cv2.imshow('Frame', frame)
 
                 # TODO: Add Image Processor
 

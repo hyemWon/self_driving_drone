@@ -40,7 +40,7 @@ class DroneClient:
         td.start()
 
     def thread_socket(self):
-        print("------ {} start".format(self.host_name))
+        print("-------- {} start".format(self.host_name))
         self.sock.connect((self.host, self.port))
 
         time.sleep(0.001)
@@ -105,8 +105,6 @@ class DroneClient:
         dst_lng = self.data.lng_dst
         self.lock.release()
 
-        print('#D.S# Drone current lat, lng : {}, {}'.format(lat, lng))
-        print('#D.S# Drone destination lat, lng : {}, {}'.format(dst_lat, dst_lng))
         await asyncio.sleep(1)
 
         print('#D.D# drone action finished {}'.format(time.time() - st))

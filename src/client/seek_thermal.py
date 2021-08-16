@@ -13,7 +13,7 @@ class SeekThermalClient:
         self.port = 8487
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-        self.cam = None     # SeekPro()
+        self.cam = SeekPro()
 
         self.isRun = False
 
