@@ -84,7 +84,6 @@ class DroneClient:
             try:
                 loop = asyncio.new_event_loop()
                 asyncio.set_event_loop(loop)
-                print('### Drone action start')
                 loop.run_until_complete(self.drone_action())
                 print('### Drone action finished')
                 loop.close()
