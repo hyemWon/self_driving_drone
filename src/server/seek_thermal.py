@@ -2,7 +2,7 @@ import socket
 import threading
 import numpy as np
 import cv2
-from time import time
+import time
 
 
 class SeekThermalServer:
@@ -28,20 +28,17 @@ class SeekThermalServer:
 
         while self.isRun:
             try:
-
-                # st = time.time()
+                st = time.time()
                 # client에서 받은 stringData의 크기 (==(str(len(stringData))).encode().ljust(16))
                 length = self.recvall(conn, 8)                      # Receive packet length
                 stringData = self.recvall(conn, int(length))        # receive real data
                 data = np.fromstring(stringData, dtype='uint8')     # convert to numpy array
 
                 frame = cv2.imdecode(data, cv2.IMREAD_GRAYSCALE)
-                mini = frame.min()  # min pixel data
-                maxi = frame.max()  # max pixel data
 
-                cv2.imshow('Seek thermal frame ', (np.clip(frame - mini, 0, maxi - mini) / (maxi - mini) * 255.).astype(np.uint8))
+                cv2.imshow('Seek thermal frame ', frame)
                 cv2.waitKey(1)
-                print("#ST# process finished")
+                print("#ST# process finished {}".format(time.time() - st))
                 # TODO: Add Image Processor
 
                 # TODO: Send to Data Queue

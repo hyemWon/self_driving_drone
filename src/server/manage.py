@@ -10,7 +10,7 @@ class ManageServer:
         self.rs_server = RealSenseServer()
         self.seek_thermal_server = SeekThermalServer()
         self.drone_server = DroneServer()
-        # TODO : add flask
+
         self.app = Flask(__name__)
         self.app.register_blueprint(gmap.blue_gmap)
         self.app.register_blueprint(user.blue_user)

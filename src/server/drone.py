@@ -1,7 +1,7 @@
 # import numpy as np
+from util.data import Data
 import threading
 import socket
-from cv2 import waitKey
 import time
 
 
@@ -11,6 +11,9 @@ class DroneServer:
         self.host = '141.223.122.51'
         self.port = 8486
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        self.data = Data().instance()
+        self.lock = self.data.lock
 
         self.isRun = False
 
@@ -44,7 +47,7 @@ class DroneServer:
 
                 print(lat, lng, dst_lat, dst_lng)
                 # TODO : Send to DataQueue Web/APP
-                time.sleep(0.5)
+                time.sleep(1)
 
             except Exception as e:
                 self.isRun = False
