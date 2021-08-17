@@ -42,7 +42,7 @@ class RealSenseServer:
                 # TODO: Send to DataQueue
 
                 cv2.waitKey(1)
-                print("#RS# process finished")
+                print("#RS# process finished {}".format(time.time() - st))
 
             except Exception as e:
                 self.isRun = False
