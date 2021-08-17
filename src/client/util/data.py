@@ -1,5 +1,5 @@
 from .singleton import Singleton
-# from threading import Lock
+from threading import Lock
 
 
 class Data(Singleton):
@@ -12,5 +12,6 @@ class Data(Singleton):
         self.lat_dst = 0.0
         self.lng_dst = 0.0
 
+        self.lock = Lock()
 
 

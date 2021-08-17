@@ -19,7 +19,7 @@ class DroneClient:
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         self.data = Data().instance()
-        self.lock = Lock()
+        self.lock = self.data.lock
 
         self.isRunSocket = False
         self.isRunDrone = False

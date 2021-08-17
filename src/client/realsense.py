@@ -47,6 +47,7 @@ class RealSenseClient:
         while self.isRun:
             try:
                 while True:
+                    st = time.time()
                     frames = self.pipeline.wait_for_frames()  # get frame
                     depth_frame = frames.get_depth_frame()  # get depth frame from frames
                     color_frame = frames.get_color_frame()  # get rgb frame from frames
@@ -69,6 +70,8 @@ class RealSenseClient:
                     # s.sendall((str(len(string_data))).encode().ljust(8) + string_data)
 
                     time.sleep(0.001)
+
+                    print('#RS# realsense job finished {}'.format(time.time() - st))
 
             except Exception as e:
                 self.isRun = False

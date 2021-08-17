@@ -33,12 +33,16 @@ class SeekThermalClient:
         while self.isRun:
             try:
                 while True:
+                    st = time.time()
                     frame = self.cam.get_image()
-                    res, encode_frame = cv2.imencode('.jpg', frame, encode_frame)
+                    rescale_frame = self.cam.rescale(frame)
+                    res, encode_frame = cv2.imencode('.jpg', rescale_frame, encode_frame)
                     string_data = np.array(encode_frame).tostring()
 
                     self.sock.sendall((str(len(string_data))).encode().ljust(8) + string_data)
                     time.sleep(0.001)
+
+                    print('#ST# seek thermal job finished {}'.format(time.time() - st))
 
             except Exception as e:
                 self.isRun = False
