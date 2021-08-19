@@ -14,9 +14,6 @@ class ManageClient:
         self.seek_thermal_client.run()
         self.drone_client.run()
 
-        while True:
-            pass
-
 
 if __name__ == '__main__':
     client_manager = ManageClient()

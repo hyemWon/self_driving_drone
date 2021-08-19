@@ -25,7 +25,7 @@ class RealSenseClient:
 
     def run(self):
         # 1920x1080 - 30, 15, 6 fps / 1280x720 - 60, 30, 15, 6 fps / 960x540 - 60, 30, 15, 6 fps
-        width, height, fps = 960, 540, 15
+        width, height, fps = 1280, 720, 15
         # self.config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
         self.config.enable_stream(rs.stream.color, width, height, rs.format.bgr8, fps)
 
@@ -34,7 +34,6 @@ class RealSenseClient:
 
         self.isRun = True
         t = threading.Thread(target=self.thread)
-        t.daemon = True
         t.start()
 
     def thread(self):
