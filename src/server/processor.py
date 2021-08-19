@@ -1,11 +1,13 @@
-import cv2
 import asyncio
+from util.data import Data
+# from util.drone_inference import run
 
 
 class ImageProcessor:
-    # TODO : Image Processor if need other processing
     def __init__(self):
-        pass
+        # self.alphapose = AlphaPose
+        self.data = Data().instance()
+        self.lock = self.data.lock
 
     def run(self):
         # start image processing

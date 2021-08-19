@@ -26,6 +26,7 @@ class SeekThermalServer:
         self.sock.listen(10)
         conn, addr = self.sock.accept()
 
+        cnt = 0
         while self.isRun:
             try:
                 st = time.time()
@@ -36,15 +37,20 @@ class SeekThermalServer:
 
                 frame = cv2.imdecode(data, cv2.IMREAD_GRAYSCALE)
 
-                cv2.imshow('Seek thermal frame ', frame)
-                cv2.waitKey(1)
-                print("#ST# process finished {}".format(time.time() - st))
+                # cv2.imshow('Seek thermal frame ', frame)
+
                 # TODO: Add Image Processor
 
                 # TODO: Send to Data Queue
 
+                cv2.imwrite("imgs/thermal/frame_{}.jpg".format(cnt), frame)
+                cv2.waitKey(10)
+                cnt += 1
+                print("#ST# process finished {}".format(time.time() - st))
+
             except Exception as e:
                 self.isRun = False
+                cv2.destroyAllWindows()
                 print(e)
                 print("-------- Close {}".format(self.host_name))
 

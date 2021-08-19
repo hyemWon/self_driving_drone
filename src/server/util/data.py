@@ -13,6 +13,8 @@ class Data(Singleton):
         self.lat_dst = 0.0
         self.lng_dst = 0.0
 
+        self.skeleton = []
+
         self.lock = Lock()
 
 

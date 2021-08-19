@@ -3,6 +3,7 @@ from realsense import RealSenseServer
 from seek_thermal import SeekThermalServer
 from drone import DroneServer
 from src.server.controller import gmap, user
+from util.cleaner import remove_all_img
 
 
 class ManageServer:
@@ -16,9 +17,10 @@ class ManageServer:
         self.app.register_blueprint(user.blue_user)
 
     def run(self):
-        self.rs_server.run()
-        self.seek_thermal_server.run()
-        self.drone_server.run()
+        remove_all_img()                # remove rgb/depth/theraml/alphapose image
+        self.rs_server.run()            # realsense thread start
+        self.seek_thermal_server.run()  # seek_thermal thread start
+        self.drone_server.run()         # drone thread start
 
         self.app.run(host='141.223.122.51', port=50000)
 
