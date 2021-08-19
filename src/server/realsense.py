@@ -26,6 +26,7 @@ class RealSenseServer:
         self.sock.listen(10)
         conn, addr = self.sock.accept()
 
+        cnt = 0
         while self.isRun:
             try:
                 st = time.time()
@@ -35,13 +36,14 @@ class RealSenseServer:
                 data = np.fromstring(stringData, dtype='uint8')     # convert to numpy array
 
                 frame = cv2.imdecode(data, cv2.IMREAD_COLOR)
-                cv2.imshow('rgb frame', frame)
-
+                # cv2.imshow('rgb frame', frame)
+                cv2.imwrite("imgs/rgb/frame_{}.jpg".format(cnt), frame)
                 # TODO: Add Image Processor
 
                 # TODO: Send to DataQueue
 
-                cv2.waitKey(1)
+                cv2.waitKey(10)
+                cnt += 1
                 print("#RS# process finished {}".format(time.time() - st))
 
             except Exception as e:
