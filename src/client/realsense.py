@@ -34,6 +34,7 @@ class RealSenseClient:
 
         self.isRun = True
         t = threading.Thread(target=self.thread)
+        t.daemon = True
         t.start()
 
     def thread(self):

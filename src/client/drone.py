@@ -23,7 +23,7 @@ class DroneClient:
 
         self.isRunSocket = False
         self.isRunDrone = False
-        self.cnt = 0    # cnt for test
+        self.cnt = 0  # cnt for test
 
     def run(self):
         # open mavsdk server
@@ -75,7 +75,8 @@ class DroneClient:
                 self.lock.acquire()
                 self.data.lat_dst = float(lat_dst)
                 self.data.lng_dst = float(lng_dst)
-                self.data.control_mode = int(control_mode)
+                if control_mode != -1 and self.data.drone_is_run:
+                    self.data.control_mode = int(control_mode)
                 self.lock.release()
 
                 time.sleep(1)
@@ -87,61 +88,157 @@ class DroneClient:
                 print(f"-------- Close {self.host_name}")
 
     def thread_drone(self):
+        # Step 1) Set async loop and check drone connection
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        drone = loop.run_until_complete(self.check_drone_state())
+        time.sleep(0.01)
+
+        if not drone:
+            self.isRunDrone = False
+            loop.close()
+            print("### --- Please Check drone state")
+
         while self.isRunDrone:
             try:
-                loop = asyncio.new_event_loop()
-                asyncio.set_event_loop(loop)
-                loop.run_until_complete(self.drone_action())
-                loop.close()
+                # Step 2)Get drone mode from data
+                self.lock.acquire()
+                flight_mode = self.data.control_mode
+                print(f"Current Drone Mode : {flight_mode}")
+                self.lock.release()
+
+                # Step 3)Start action by drone mode
+                if flight_mode == 1:
+                    loop.run_until_complete(self.action_basic(drone))  # action_basic
+                elif flight_mode == 2:
+                    loop.run_until_complete(self.action_just_arming(drone))  # action just arming
+                elif flight_mode == 3:
+                    loop.run_until_complete(self.action_landing(drone))  # action landing
+                elif flight_mode == 4:
+                    loop.run_until_complete(self.action_by_keyboard(drone))  # action by using keyboard
+                else:
+                    print("Command 0 State")
+                    time.sleep(0.2)  # delay 0.2s
+
+                # Step 4) Set drone mode 0 (default)
+                self.lock.acquire()
+                self.data.control_mode = 0
+                self.lock.release()
+
             except Exception as e:
                 self.isRunDrone = False
+
+                loop.close()
                 print(e)
                 print(f"-------- Close {self.host_name}")
 
-    async def drone_check(self):
-        await asyncio.sleep(1)
+    def thread_drone_shutdown(self):
+        self.lock.acquire()
+        print(f"Current Drone Mode : {self.data.control_mode}")
+        self.lock.release()
 
-        drone = System(mavsdk_server_address='localhost', port=50051)
-        await drone.connect(system_address='serial:///dev/ttyTHS1:921600')
+        # shutdown
+        self.isRunDrone = False
 
-        print("Waiting for drone to connect...")
-        async for state in drone.core.connection_state():
-            if state.is_connected:
-                print("Drone discovered")
-                break
-
-        print("Waiting for drone to have a global position estimate...")
-        async for health in drone.telemetry.health():
-            ### 센서들의 상태 캘리브래이션 확인
-            ### position 제어에 충분한지 확인
-            if health.is_global_position_ok:
-                print("Global position estimate ok")
-                ### 제어에 충분하다면 출력
-                break
-
-        print("Fetching amsl altitude at home location....")
-        async for terrain_info in drone.telemetry.home():
-            absolute_altitude = terrain_info.absolute_altitude_m
-            break
-
-    async def drone_action(self):
+    # mode == 1
+    async def action_basic(self, drone):
         st = time.time()
-
         self.lock.acquire()
         print(f"Current Drone Mode : {self.data.control_mode}")
         self.lock.release()
         await asyncio.sleep(0.01)
 
+        print("# -- get position")
+        async for position in drone.telemetry.position():
+            # for saving current latitude, longitude
+            self.lock.acquire()
+            self.data.lat_drone = position.latitude_deg
+            self.data.lng_drone = position.longitude_deg
+            self.lock.release()
+
+            lat_drone = position.latitude_deg
+            lng_drone = position.longitude_deg
+            print(f"current GPS : lat - {lat_drone} / lng - {lng_drone}")
+            break
+
+        print("-- Arming")
+        await drone.action.arm()
+        ### 이륙을 하지 않고 드론의 구동이 시작
+        ### 프로펠러가 돌기 시작함
+        # flying_alt = 2.0
+        # await drone.action.set_takeoff_altitude(flying_alt)
+        ### 이륙하면 도달한 드론의 고도를 절대고도+30으로 맞춤
+        await asyncio.sleep(2)
+        ### 위의 코드들을 실행하고 2초 정도 다른 명령을 주진 않음
+
+        print("-- disarming --")
+        await drone.action.disarm()
+        await asyncio.sleep(5)
+
+        print('#D.D# drone action finished {}'.format(time.time() - st))
+
+    # mode == 2
+    async def action_just_arming(self, drone):
+        self.lock.acquire()
+        print(f"Current Drone Mode : {self.data.control_mode}")
+        self.lock.release()
+        await asyncio.sleep(0.01)
+
+        print("-- Arming")
+        await drone.action.arm()
+        ### 이륙을 하지 않고 드론의 구동이 시작
+        ### 프로펠러가 돌기 시작함
+        # flying_alt = 2.0
+        # await drone.action.set_takeoff_altitude(flying_alt)
+        ### 이륙하면 도달한 드론의 고도를 절대고도+30으로 맞춤
+        await asyncio.sleep(2)
+        ### 위의 코드들을 실행하고 2초 정도 다른 명령을 주진 않음
+
+        print("-- disarming --")
+        await drone.action.disarm()
+
+        self.lock.acquire()
+        self.data.control_mode = 0
+        self.lock.release()
+        await asyncio.sleep(5)
+
+    # mode == 3
+    async def action_landing(self, drone):
+
+        await asyncio.sleep(0.01)
+
+        print("-- landing start! --")
+        await drone.action.land()
+        await asyncio.sleep(15)
+
+        print("-- disarming --")
+        await drone.action.disarm()
+        await asyncio.sleep(5)
+
+    # mode == 4
+    async def action_by_keyboard(self, drone):
+        print("# -- [Roll] : e,d / [Pitch] : s,f \n# -- [Yaw] : j,l / [Throttle] : i,k\n")
+        direction, second = input("### Keyboard Input (Direction, second): ").split(sep=' ')
+        second = int(second)
+
+        print(direction, second)
+        # TODO : action by using keyboard
+        ## action : [Roll] : e,d / [Pitch] : s,f \n# -- [Yaw] : j,l / [Throttle] : i,k
+
+    async def check_drone_state(self):
+        print("## Checking Drone State...")
+        await asyncio.sleep(1)
+
         drone = System(mavsdk_server_address='localhost', port=50051)
         await drone.connect(system_address='serial:///dev/ttyTHS1:921600')
 
-        print("Waiting for drone to connect...")
+        print("# Waiting for drone to connect...")
         async for state in drone.core.connection_state():
             if state.is_connected:
                 print("Drone discovered")
                 break
 
-        print("Waiting for drone to have a global position estimate...")
+        print("# Waiting for drone to have a global position estimate...")
         async for health in drone.telemetry.health():
             ### 센서들의 상태 캘리브래이션 확인
             ### position 제어에 충분한지 확인
@@ -150,44 +247,16 @@ class DroneClient:
                 ### 제어에 충분하다면 출력
                 break
 
-        print("Fetching amsl altitude at home location....")
+        print("# Fetching amsl altitude at home location....")
         async for terrain_info in drone.telemetry.home():
             absolute_altitude = terrain_info.absolute_altitude_m
-            print(f"absolute_altitude : {absolute_altitude}")
             break
 
-        print(drone.telemetry)
-        async for position in drone.telemetry.position():
-            self.lock.acquire()
-
-            self.data.lat_drone = position.latitude_deg
-            self.data.lng_drone = position.longitude_deg
-            lat_drone = self.data.lat_drone
-            lng_drone = self.data.lng_drone
-
-            print(f"current GPS : lat - {self.data.lat_drone} / lng - {self.data.lng_drone}")
-            self.lock.release()
-            print(f"current GPS : lat - {lat_drone} / lng - {lng_drone}")
-
-        # print("-- Arming")
-        # await drone.action.arm()
-        # ### 이륙을 하지 않고 드론의 구동이 시작
-        # ### 프로펠러가 돌기 시작함
-        # flying_alt = 2.0
-        # await drone.action.set_takeoff_altitude(flying_alt)
-        # ### 이륙하면 도달한 드론의 고도를 절대고도+30으로 맞춤
-        # await asyncio.sleep(2)
-        # ### 위의 코드들을 실행하고 2초 정도 다른 명령을 주진 않음
-        #
-        # print("-- disarming --")
-        # await drone.action.disarm()
-        await asyncio.sleep(10)
-
-        print('#D.D# drone action finished {}'.format(time.time() - st))
+        return drone
 
     def open_pixhawk_server(self):
         print("----OpenServer Thread Start")
-        subprocess.run('sh ~/self-driving-drone/scripts/run_mavsdk_server.sh', shell=True)
+        subprocess.run('sh ~/self_driving_drone/scripts/run_mavsdk_server.sh', shell=True)
         print("----Server Start!----")
         print("#############################################################################")
 
@@ -201,5 +270,3 @@ class DroneClient:
             buf += newbuf
             count -= len(newbuf)
         return buf
-
-
