@@ -8,6 +8,7 @@ class Data(Singleton):
         self.lng_drone = 0.0
 
         self.control_mode = 0
+        self.drone_is_run = False
 
         self.lat_dst = 0.0
         self.lng_dst = 0.0
