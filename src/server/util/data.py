@@ -5,17 +5,34 @@ from collections import deque
 
 class Data(Singleton):
     def __init__(self):
-        self.lat_drone = 0.0
-        self.lng_drone = 0.0
+        # set gps points [lat, lng]
+        self.gps_point = {
+            'current': [0.0, 0.0],  # Current drone GPS point
+            'base_station': [0.0, 0.0],  # Base Station GPS point
+            'src': [0.0, 0.0],  # service start(source) GPS point
+            'dst': [0.0, 0.0]  # service end(destination) GPS point
+        }
 
+        # drone control mode
         self.control_mode = 0
 
-        # [ground] 36.012903, 129.318985 /
-        self.lat_dst = 0.0
-        self.lng_dst = 0.0
+        # Alpha-pose person skeleton points
+        self.skeleton = [
 
-        self.skeleton = []
+        ]
 
+        # yolo detection person boxes
+        self.person_boxes = {
+            # [x, y] / left-up / right-up / left-down / right-down / center-point
+            'person': [[0, 0], [0, 1], [1, 0], [1, 1], [0.5, 0.5]]
+        }
+
+        # drone controlling signal
+        self.control_information = {
+
+        }
+
+        # thread lock
         self.lock = Lock()
 
 
