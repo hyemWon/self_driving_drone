@@ -43,9 +43,9 @@ class DroneServer:
 
                 self.lock.acquire()
                 # save current drone gps point
-                self.data.lat_drone, self.data.lng_drone = lat, lng
+                self.data.gps_point['current'][0], self.data.gps_point['current'][1] = lat, lng
 
-                dst_lat, dst_lng = self.data.lat_dst, self.data.lng_dst
+                dst_lat, dst_lng = self.data.gps_point['dst'][0], self.data.gps_point['dst'][1]
                 if self.data.control_mode != -1:
                     command = self.data.control_mode
                 self.lock.release()
@@ -53,11 +53,6 @@ class DroneServer:
                 # Send to Drone(Client) destination gps, control mode
                 packet = str(dst_lat) + '/' + str(dst_lng) + '/' + str(command)
                 conn.sendall((str(len(packet))).encode().ljust(8) + packet.encode())
-
-                print(lat, lng, dst_lat, dst_lng)
-                # TODO : Send to DataQueue Web/APP
-
-
 
                 time.sleep(1)
 
