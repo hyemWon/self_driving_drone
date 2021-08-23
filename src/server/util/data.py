@@ -10,6 +10,7 @@ class Data(Singleton):
 
         self.control_mode = 0
 
+        # [ground] 36.012903, 129.318985 /
         self.lat_dst = 0.0
         self.lng_dst = 0.0
 

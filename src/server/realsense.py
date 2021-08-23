@@ -42,7 +42,7 @@ class RealSenseServer:
 
                 # TODO: Send to DataQueue
 
-                cv2.waitKey(10)
+                cv2.waitKey(1)
                 cnt += 1
                 print("#RS# process finished {}".format(time.time() - st))
 
