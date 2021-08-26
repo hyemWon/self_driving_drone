@@ -9,10 +9,10 @@ from controller import gmap, user, drone
 
 class ManageServer:
     def __init__(self):
-        self.rs_server = RealSenseServer()
+        # self.rs_server = RealSenseServer()
         # self.seek_thermal_server = SeekThermalServer()
         self.drone_server = DroneServer()
-        self.processor = ImageProcessor()
+        # self.processor = ImageProcessor()
 
         self.app = Flask(__name__)
         self.app.register_blueprint(gmap.blue_gmap)

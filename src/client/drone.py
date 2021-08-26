@@ -94,10 +94,10 @@ class DroneClient:
         # Step 1) Set async loop and check drone connection
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
-        drone = loop.run_until_complete(self.check_drone_state())
+        loop.run_until_complete(self.check_drone_state())
         time.sleep(0.01)
 
-        if not drone:
+        if not self.drone:
             self.isRunDrone = False
             loop.close()
             print("### --- Please Check drone state")
@@ -399,28 +399,29 @@ class DroneClient:
         print("#-- Checking Drone State...")
         await asyncio.sleep(1)
 
-        drone = System(mavsdk_server_address='localhost', port=50051)
-        await drone.connect(system_address='serial:///dev/ttyTHS1:921600')
+        self.drone = System(mavsdk_server_address='localhost', port=50051)
+        await self.drone.connect(system_address='serial:///dev/ttyTHS1:921600')
 
         print("#-- Waiting for drone to connect...")
-        async for state in drone.core.connection_state():
+        async for state in self.drone.core.connection_state():
+            print(state)
             if state.is_connected:
                 print(f"#--- Drone discovered")
                 break
 
         print("#-- Waiting for drone to have a global position estimate...")
-        async for health in drone.telemetry.health():
+        async for health in self.drone.telemetry.health():
             print(health)
-            if health.is_global_position_ok:
-                print("#--- Global position estimate ok")
-                break
+            # if health.is_global_position_ok:
+            #     print("#--- Global position estimate ok")
+            #     break
+            break
 
         # print("# Fetching amsl altitude at home location....")
         # async for terrain_info in drone.telemetry.home():
         #     self.absolute_altitude = terrain_info.absolute_altitude_m
         #     break
 
-        return drone
 
     def open_pixhawk_server(self):
         print("----OpenServer Thread Start")
