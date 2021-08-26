@@ -26,7 +26,7 @@ def gps():
 
 @blue_drone.route("/command")
 def command():
-    cmd = request.args.get('command', 0)   # default mode == -1
+    cmd = request.args.get('num', 0)   # default mode == -1
 
     data.lock.acquire()
     data.control_mode = int(cmd)
@@ -35,3 +35,8 @@ def command():
     return jsonify({
         'command': cmd
     })
+
+
+@blue_drone.route("/dst")
+def dst():
+    lat = request.args.get('lat', )

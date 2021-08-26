@@ -76,8 +76,8 @@ class DroneClient:
                 lat_dst, lng_dst, control_mode = packet_recv.decode(encoding='utf-8').split(sep='/')
 
                 self.lock.acquire()
-                self.data.gps_point['end'][0] = float(lat_dst)
-                self.data.gps_point['end'][1] = float(lng_dst)
+                self.data.gps_point['dst'][0] = float(lat_dst)
+                self.data.gps_point['dst'][1] = float(lng_dst)
                 if control_mode != -1 and self.data.drone_is_doing_action:
                     self.data.control_mode = int(control_mode)
                 self.lock.release()
@@ -157,7 +157,8 @@ class DroneClient:
         print("#-- Arming")
         await self.drone.action.arm()
         await self.drone.set_maximum_speed(20)
-        flying_alt = self.absolute_altitude + 10.0
+        # flying_alt = self.absolute_altitude + 10.0
+        flying_alt = 5.0
         await self.drone.action.set_takeoff_altitude(flying_alt)
         await asyncio.sleep(1)
 
@@ -228,7 +229,8 @@ class DroneClient:
         await asyncio.sleep(5)
 
         print("-- Set take off altitude --")
-        flying_alt = self.absolute_altitude + 5.0       # flying_alt = 2.0
+        # flying_alt = self.absolute_altitude + 5.0
+        flying_alt = 2.0
         await self.drone.action.set_takeoff_altitude(flying_alt)
         await asyncio.sleep(2)
 
@@ -260,7 +262,8 @@ class DroneClient:
         print("# -- Arming")
         await self.drone.action.arm()
         await self.drone.set_maximum_speed(20)
-        flying_alt = self.absolute_altitude + 10.0
+        # flying_alt = self.absolute_altitude + 10.0
+        flying_alt = 5.0
         await self.drone.action.set_takeoff_altitude(flying_alt)
         await asyncio.sleep(1)
 
@@ -310,6 +313,8 @@ class DroneClient:
                     await self.turn_counterclockwise()
                 elif ch == 'h':
                     await self.hold_position()
+                else:
+                    pass
         await asyncio.sleep(0.2)
 
         await self.drone.action.land()
@@ -369,10 +374,10 @@ class DroneClient:
                 print("#--- Global position estimate ok")
                 break
 
-        print("# Fetching amsl altitude at home location....")
-        async for terrain_info in drone.telemetry.home():
-            self.absolute_altitude = terrain_info.absolute_altitude_m
-            break
+        # print("# Fetching amsl altitude at home location....")
+        # async for terrain_info in drone.telemetry.home():
+        #     self.absolute_altitude = terrain_info.absolute_altitude_m
+        #     break
 
         return drone
 
@@ -422,12 +427,12 @@ class DroneClient:
 
     async def go_up(self, sec=1):
         await self.drone.offborad.set_velocity_body(
-            VelocityBodyYawspeed(0.0, -1.0, 0.0, 0.0))
+            VelocityBodyYawspeed(0.0, 0.0, 1.0, 0.0))
         await asyncio.sleep(sec)
 
     async def turn_clockwise(self, sec=4):
         await self.drone.offborad.set_velocity_body(
-            VelocityBodyYawspeed(0.0, -1.0, 0.0, 0.0)
+            VelocityBodyYawspeed(0.0, 0.0, 0.0, 60.0)
         )
         await asyncio.sleep(sec)
 
