@@ -84,7 +84,7 @@ class DroneClient:
 
                 time.sleep(0.05)
                 print('#D.S# socket job finished {}'.format(self.host_name, time.time() - st))
-
+                print(lat_drone, lng_drone, lat_dst, lng_dst)
             except Exception as e:
                 self.isRunSocket = False
                 print(e)
@@ -113,13 +113,15 @@ class DroneClient:
 
                 # Step 3)Start action by drone mode
                 if flight_mode == 1:
-                    loop.run_until_complete(self.action_goto_gps_point('dst'))  # action_basic
+                    loop.run_until_complete(self.action_goto_gps_point('dst'))  # action go to gps point
                 elif flight_mode == 2:
                     loop.run_until_complete(self.action_just_arming_and_disarming())  # action just arming
                 elif flight_mode == 3:
                     loop.run_until_complete(self.action_takeoff_and_landing())  # action landing
                 elif flight_mode == 4:
                     loop.run_until_complete(self.action_by_keyboard())  # action by using keyboard
+                # elif flight_mode == 5:
+                #     loop.run_until_complete()
                 else:
                     print("Command 0 State")
                     time.sleep(0.2)  # delay 0.2s
@@ -140,7 +142,7 @@ class DroneClient:
         # shutdown
         self.isRunDrone = False
 
-    # mode == 1
+    # mode == 1 : go to gps point
     async def action_goto_gps_point(self, dst_name):
         st = time.time()
         err = 0.00005
@@ -165,7 +167,7 @@ class DroneClient:
 
         # moving to gps position
         print("# -- Going to GPS point")
-        await self.drone.action.goto_location(lat_dst, lng_dst, flying_alt, 0)
+        await self.drone.action.goto_location(lat_dst, lng_dst, flying_alt, float('nan'))
         async for position in self.drone.telemetry.position():
             lat_drone = position.latitude_deg
             lng_drone = position.longitude_deg
@@ -182,11 +184,14 @@ class DroneClient:
                 await self.drone.action.goto_location(lat_dst, lng_dst, flying_alt, 0)
                 break
 
-        print("#-- Offborad Setting")
+        print("# -- Arrived and waiting --")
+        await asyncio.sleep(4)
 
+        print("# -- Landing --")
+        await self.drone.action.land()
+        await asyncio.sleep(10)
 
-
-        print("# -- Disarming")
+        print("# -- Disarming --")
         await self.drone.action.disarm()
         await asyncio.sleep(5)
 
@@ -197,7 +202,7 @@ class DroneClient:
         self.lock.release()
         print('#D.D# drone action finished {}'.format(time.time() - st))
 
-    # mode == 2
+    # mode == 2 : arming and disarming
     async def action_just_arming_and_disarming(self):
         await asyncio.sleep(0.01)
 
@@ -215,20 +220,27 @@ class DroneClient:
         self.data.drone_is_doing_action = False
         self.lock.release()
 
-    # mode == 3
+    # mode == 3 : take off and landing
     async def action_takeoff_and_landing(self):
         await asyncio.sleep(0.01)
-        print("-- Arming")
+        print("-- Arming --")
         await self.drone.action.arm()
         await asyncio.sleep(5)
 
+        print("-- Set take off altitude --")
+        flying_alt = self.absolute_altitude + 5.0       # flying_alt = 2.0
+        await self.drone.action.set_takeoff_altitude(flying_alt)
+        await asyncio.sleep(2)
 
+        print("-- Taking off --")
+        await self.drone.action.takeoff()
+        await asyncio.sleep(10)
 
-        print("-- landing start! --")
+        print("-- Landing --")
         await self.drone.action.land()
         await asyncio.sleep(15)
 
-        print("-- disarming --")
+        print("-- Disarming --")
         await self.drone.action.disarm()
         await asyncio.sleep(5)
 
@@ -238,17 +250,72 @@ class DroneClient:
         self.data.drone_is_doing_action = False
         self.lock.release()
 
-    # mode == 4
+    # mode == 4 : Keyboard Control mode
     async def action_by_keyboard(self):
-        print("# -- [Roll] : e,d / [Pitch] : s,f \n# -- [Yaw] : j,l / [Throttle] : i,k\n")
-        direction, second = input("### Keyboard Input (Direction, second): ").split(sep=' ')
-        second = int(second)
+        # print("# -- [Roll] : e,d / [Pitch] : s,f \n# -- [Yaw] : j,l / [Throttle] : i,k\n")
+        # direction, second = input("### Keyboard Input (Direction, second): ").split(sep=' ')
+        # second = int(second)
+        #
+        # print(direction, second)
+        print("# -- Arming")
+        await self.drone.action.arm()
+        await self.drone.set_maximum_speed(20)
+        flying_alt = self.absolute_altitude + 10.0
+        await self.drone.action.set_takeoff_altitude(flying_alt)
+        await asyncio.sleep(1)
 
-        print(direction, second)
-        # TODO : action by using keyboard
-        ## action : [Roll] : e,d / [Pitch] : s,f \n# -- [Yaw] : j,l / [Throttle] : i,k
+        print("# -- Taking off")
+        await self.drone.action.takeoff()
+        await asyncio.sleep(10)
 
+        print("# -- Setting initial setpoint")
+        await self.drone.offboard.set_velocity_body(
+            VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
+
+        print("# -- Starting offboard mode")
+        try:
+            await self.drone.offboard.start()
+        except OffboardError as error:
+            print(f"Starting offboard mode failed with error code: {error._result.result}")
+            print("# -- Disarming")
+            await self.drone.action.land()
+            await self.drone.action.disarm()
+            return
+
+        ch, prev_ch = '', ''
+        # VelocityBodyYawspeed(front(+)/back(-), right(+)/left(-), down(+)/up(-) , clockwise(+)/counterclockwise(-))
+        while ch != 'q':
+            # action : [forward/backward] : e,d            / [left/right] : s,f
+            #          [clockwise/counterclockwise] : j,l  / [up/donw] : i,k
+            ch = input("### ----- Input Char : ").lower()
+            if ch != prev_ch:
+                await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
+                await asyncio.sleep(1)
+
+                if ch == 'e':
+                    await self.go_forward()
+                elif ch == 'd':
+                    await self.go_backward()
+                elif ch == 'f':
+                    await self.go_right()
+                elif ch == 's':
+                    await self.go_left()
+                elif ch == 'i':
+                    await self.go_up()
+                elif ch == 'k':
+                    await self.go_down()
+                elif ch == 'j':
+                    await self.turn_clockwise()
+                elif ch == 'l':
+                    await self.turn_counterclockwise()
+                elif ch == 'h':
+                    await self.hold_postion()
         await asyncio.sleep(0.2)
+
+        await self.drone.action.land()
+        await asyncio.sleep(10)
+        await self.drone.action.disarm()
+        await asyncio.sleep(5)
 
         # next mode set by 0
         self.lock.acquire()
@@ -256,6 +323,7 @@ class DroneClient:
         self.data.drone_is_doing_action = False
         self.lock.release()
 
+    # mode == 5 : Person Following mode
     async def action_detection_person_and_following(self, drone):
         await asyncio.sleep(0.01)
 
@@ -271,6 +339,7 @@ class DroneClient:
         self.data.drone_is_doing_action = False
         self.lock.release()
 
+    # mode == 6 : Person recognize mode
     async def recognize_person(self):
         await asyncio.sleep(0.01)
         pass
@@ -291,7 +360,7 @@ class DroneClient:
         print("#-- Waiting for drone to connect...")
         async for state in drone.core.connection_state():
             if state.is_connected:
-                print(f"#--- Drone discovered with UUID : {state.uuid}")
+                print(f"#--- Drone discovered")
                 break
 
         print("#-- Waiting for drone to have a global position estimate...")
@@ -309,9 +378,10 @@ class DroneClient:
 
     def open_pixhawk_server(self):
         print("----OpenServer Thread Start")
-        subprocess.run('sh ~/self_driving_drone/scripts/run_mavsdk_server.sh', shell=True)
-        print("----Server Start!----")
+        print("----Mavsdk Server Start!----")
         print("#############################################################################")
+        subprocess.run('sh ~/self_driving_drone/scripts/run_mavsdk_server.sh', shell=True)
+        print("----Mavsdk Server End!----")
 
     def recvall(self, count):
         # 바이트 문자열
@@ -323,3 +393,49 @@ class DroneClient:
             buf += newbuf
             count -= len(newbuf)
         return buf
+
+    # -------------- Keyboard Commands
+    async def go_forward(self, sec=1):
+        await self.drone.offborad.set_velocity_body(
+            VelocityBodyYawspeed(1.0, 0.0, 0.0, 0.0))
+        await asyncio.sleep(sec)
+
+    async def go_backward(self, sec=1):
+        await self.drone.offboard.set_velocity_body(
+            VelocityBodyYawspeed(-1.0, 0.0, 0.0, 0.0))
+        await asyncio.sleep(sec)
+
+    async def go_right(self, sec=1):
+        await self.drone.offborad.set_velocity_body(
+            VelocityBodyYawspeed(0.0, 1.0, 0.0, 0.0))
+        await asyncio.sleep(sec)
+
+    async def go_left(self, sec=1):
+        await self.drone.offborad.set_velocity_body(
+            VelocityBodyYawspeed(0.0, -1.0, 0.0, 0.0))
+        await asyncio.sleep(sec)
+
+    async def go_down(self, sec=1):
+        await self.drone.offborad.set_velocity_body(
+            VelocityBodyYawspeed(0.0, 0.0, -1.0, 0.0))
+        await asyncio.sleep(sec)
+
+    async def go_up(self, sec=1):
+        await self.drone.offborad.set_velocity_body(
+            VelocityBodyYawspeed(0.0, -1.0, 0.0, 0.0))
+        await asyncio.sleep(sec)
+
+    async def turn_clockwise(self, sec=4):
+        await self.drone.offborad.set_velocity_body(
+            VelocityBodyYawspeed(0.0, -1.0, 0.0, 0.0)
+        )
+        await asyncio.sleep(sec)
+
+    async def turn_counterclockwise(self, sec=4):
+        await self.drone.offborad.set_velocity_body(
+            VelocityBodyYawspeed(0.0, 0.0, 0.0, -60.0)
+        )
+        await asyncio.sleep(sec)
+
+
+

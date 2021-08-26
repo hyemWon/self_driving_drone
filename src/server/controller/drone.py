@@ -8,17 +8,19 @@ blue_drone = Blueprint("drone", __name__, url_prefix="/drone")
 data = Data().instance()
 
 
-@blue_drone.route("/gps")
+@blue_drone.route("/gps", methods=['GET'])
 def gps():
     data.lock.acquire()
-    lat = data.lat_drone
-    lng = data.lng_drone
+    lat = data.gps_point['current'][0]
+    lng = data.gps_point['current'][1]
     data.lock.release()
 
     # f"--- [GPS] lat : {lat} / lng {lng}"
     return jsonify({
-        'lat': lat,
-        'lng': lng
+        'current': {
+            'lat': lat,
+            'lng': lng
+        }
     })
 
 
@@ -27,7 +29,7 @@ def command():
     cmd = request.args.get('command', 0)   # default mode == -1
 
     data.lock.acquire()
-    data.control_mode = cmd
+    data.control_mode = int(cmd)
     data.lock.release()
 
     return jsonify({

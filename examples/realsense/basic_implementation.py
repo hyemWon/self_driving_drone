@@ -90,5 +90,7 @@ def run_realsense():
         # -- Stop streaming
         pipeline.stop()
 
-if __name__ == '__name__':
-    run_realsense()
+
+if __name__ == '__main__':
+    print("Hello")
+    # run_realsense()
