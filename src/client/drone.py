@@ -120,8 +120,12 @@ class DroneClient:
                     loop.run_until_complete(self.action_takeoff_and_landing())  # action landing
                 elif flight_mode == 4:
                     loop.run_until_complete(self.action_by_keyboard())  # action by using keyboard
-                # elif flight_mode == 5:
-                #     loop.run_until_complete()
+                elif flight_mode == 5:
+                    loop.run_until_complete(self.action_detection_person_and_following())
+                elif flight_mode == 6:
+                    loop.run_until_complete(self.recognize_person())
+                elif flight_mode == 7:
+                    loop.run_until_complete(self.offboard_check())
                 else:
                     print("Command 0 State")
                     time.sleep(0.2)  # delay 0.2s
@@ -283,6 +287,10 @@ class DroneClient:
             print("# -- Disarming")
             await self.drone.action.land()
             await self.drone.action.disarm()
+            self.lock.acquire()
+            self.data.control_mode = 0
+            self.data.drone_is_doing_action = False
+            self.lock.release()
             return
 
         ch, prev_ch = '', ''
@@ -355,6 +363,38 @@ class DroneClient:
         self.data.drone_is_doing_action = False
         self.lock.release()
 
+    # mode == 7 : Offboard checking mode
+    async def offboard_check(self):
+        print("# -- Starting offboard mode")
+        try:
+            await self.drone.offboard.start()
+        except OffboardError as error:
+            print(f"Starting offboard mode failed with error code: {error._result.result}")
+            self.lock.acquire()
+            self.data.control_mode = 0
+            self.data.drone_is_doing_action = False
+            self.lock.release()
+            return
+
+        await asyncio.sleep(2)
+
+        print("-- Stopping offboard")
+        try:
+            await self.drone.offboard.stop()
+        except OffboardError as error:
+            print(f"Stopping offboard mode failed with error code: {error._result.result}")
+            self.lock.acquire()
+            self.data.control_mode = 0
+            self.data.drone_is_doing_action = False
+            self.lock.release()
+            return
+
+        self.lock.acquire()
+        self.data.control_mode = 0
+        self.data.drone_is_doing_action = False
+        self.lock.release()
+
+
     async def check_drone_state(self):
         print("#-- Checking Drone State...")
         await asyncio.sleep(1)
@@ -370,6 +410,7 @@ class DroneClient:
 
         print("#-- Waiting for drone to have a global position estimate...")
         async for health in drone.telemetry.health():
+            print(health)
             if health.is_global_position_ok:
                 print("#--- Global position estimate ok")
                 break
