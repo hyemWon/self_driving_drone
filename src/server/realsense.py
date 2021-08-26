@@ -3,6 +3,7 @@ import cv2
 import threading
 import socket
 import time
+from util.data import FrameQueue
 
 
 class RealSenseServer:
@@ -11,7 +12,7 @@ class RealSenseServer:
         self.host = '141.223.122.51'
         self.port = 8485
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
+        self.frame_queue = FrameQueue().instance()
         self.isRun = False
 
     def run(self):
@@ -21,7 +22,7 @@ class RealSenseServer:
         t.start()
 
     def thread(self):
-        print("-------- {}".format(self.host_name))
+        print(f"-------- {self.host_name} start")
         self.sock.bind((self.host, self.port))
         self.sock.listen(10)
         conn, addr = self.sock.accept()
@@ -38,9 +39,8 @@ class RealSenseServer:
                 frame = cv2.imdecode(data, cv2.IMREAD_COLOR)
                 # cv2.imshow('rgb frame', frame)
                 cv2.imwrite("imgs/rgb/frame_{}.jpg".format(cnt), frame)
-                # TODO: Add Image Processor
 
-                # TODO: Send to DataQueue
+                self.frame_queue.push(frame)
 
                 cv2.waitKey(1)
                 cnt += 1

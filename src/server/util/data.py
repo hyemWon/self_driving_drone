@@ -36,7 +36,7 @@ class Data(Singleton):
         self.lock = Lock()
 
 
-class DataQueue(Singleton):
+class FrameQueue(Singleton):
     def __init__(self):
         self.queue = deque()
         self.lock = Lock()

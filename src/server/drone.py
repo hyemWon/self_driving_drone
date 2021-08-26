@@ -25,7 +25,7 @@ class DroneServer:
         t.start()
 
     def thread(self):
-        print("-------- {}".format(self.host_name))
+        print(f"-------- {self.host_name} start")
         self.sock.bind((self.host, self.port))
         self.sock.listen(10)
         conn, addr = self.sock.accept()
@@ -54,6 +54,7 @@ class DroneServer:
                 packet = str(dst_lat) + '/' + str(dst_lng) + '/' + str(command)
                 conn.sendall((str(len(packet))).encode().ljust(8) + packet.encode())
 
+                print(lat, lng, dst_lat, dst_lng)
                 time.sleep(1)
 
             except Exception as e:
