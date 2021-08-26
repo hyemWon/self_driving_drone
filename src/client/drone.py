@@ -309,7 +309,7 @@ class DroneClient:
                 elif ch == 'l':
                     await self.turn_counterclockwise()
                 elif ch == 'h':
-                    await self.hold_postion()
+                    await self.hold_position()
         await asyncio.sleep(0.2)
 
         await self.drone.action.land()
@@ -437,5 +437,9 @@ class DroneClient:
         )
         await asyncio.sleep(sec)
 
-
+    async def hold_position(self, sec=2):
+        await self.drone.offborad.set_velocity_body(
+            VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0)
+        )
+        await asyncio.sleep(sec)
 
