@@ -25,10 +25,10 @@ class DroneServer:
         t.start()
 
     def thread(self):
-        print(f"-------- {self.host_name} start")
         self.sock.bind((self.host, self.port))
         self.sock.listen(10)
         conn, addr = self.sock.accept()
+        print(f"-------- {self.host_name}, {addr} start")
 
         while self.isRun:
             try:
@@ -39,14 +39,14 @@ class DroneServer:
                     print("{} packet not received !!".format(self.host_name))
                     continue
                 lat, lng = packet.decode(encoding='utf-8').split(sep='/')
-                command = -1
 
                 self.lock.acquire()
                 # save current drone gps point
                 self.data.gps_point['current'][0], self.data.gps_point['current'][1] = lat, lng
 
+                command = self.data.control_mode
                 dst_lat, dst_lng = self.data.gps_point['dst'][0], self.data.gps_point['dst'][1]
-                if self.data.control_mode != -1:
+                if self.data.control_mode > 0:
                     command = self.data.control_mode
                 self.lock.release()
 

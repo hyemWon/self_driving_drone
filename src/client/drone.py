@@ -76,8 +76,8 @@ class DroneClient:
                 lat_dst, lng_dst, control_mode = packet_recv.decode(encoding='utf-8').split(sep='/')
 
                 self.lock.acquire()
-                self.data.gps_point['end'][0] = float(lat_dst)
-                self.data.gps_point['end'][1] = float(lng_dst)
+                self.data.gps_point['dst'][0] = float(lat_dst)
+                self.data.gps_point['dst'][1] = float(lng_dst)
                 if control_mode != -1 and self.data.drone_is_doing_action:
                     self.data.control_mode = int(control_mode)
                 self.lock.release()
@@ -120,8 +120,12 @@ class DroneClient:
                     loop.run_until_complete(self.action_takeoff_and_landing())  # action landing
                 elif flight_mode == 4:
                     loop.run_until_complete(self.action_by_keyboard())  # action by using keyboard
-                # elif flight_mode == 5:
-                #     loop.run_until_complete()
+                elif flight_mode == 5:
+                    loop.run_until_complete(self.action_detection_person_and_following())
+                elif flight_mode == 6:
+                    loop.run_until_complete(self.recognize_person())
+                elif flight_mode == 7:
+                    loop.run_until_complete(self.offboard_check())
                 else:
                     print("Command 0 State")
                     time.sleep(0.2)  # delay 0.2s
@@ -157,7 +161,8 @@ class DroneClient:
         print("#-- Arming")
         await self.drone.action.arm()
         await self.drone.set_maximum_speed(20)
-        flying_alt = self.absolute_altitude + 10.0
+        # flying_alt = self.absolute_altitude + 10.0
+        flying_alt = 5.0
         await self.drone.action.set_takeoff_altitude(flying_alt)
         await asyncio.sleep(1)
 
@@ -228,7 +233,8 @@ class DroneClient:
         await asyncio.sleep(5)
 
         print("-- Set take off altitude --")
-        flying_alt = self.absolute_altitude + 5.0       # flying_alt = 2.0
+        # flying_alt = self.absolute_altitude + 5.0
+        flying_alt = 2.0
         await self.drone.action.set_takeoff_altitude(flying_alt)
         await asyncio.sleep(2)
 
@@ -260,7 +266,8 @@ class DroneClient:
         print("# -- Arming")
         await self.drone.action.arm()
         await self.drone.set_maximum_speed(20)
-        flying_alt = self.absolute_altitude + 10.0
+        # flying_alt = self.absolute_altitude + 10.0
+        flying_alt = 5.0
         await self.drone.action.set_takeoff_altitude(flying_alt)
         await asyncio.sleep(1)
 
@@ -280,6 +287,10 @@ class DroneClient:
             print("# -- Disarming")
             await self.drone.action.land()
             await self.drone.action.disarm()
+            self.lock.acquire()
+            self.data.control_mode = 0
+            self.data.drone_is_doing_action = False
+            self.lock.release()
             return
 
         ch, prev_ch = '', ''
@@ -310,6 +321,8 @@ class DroneClient:
                     await self.turn_counterclockwise()
                 elif ch == 'h':
                     await self.hold_position()
+                else:
+                    pass
         await asyncio.sleep(0.2)
 
         await self.drone.action.land()
@@ -350,6 +363,38 @@ class DroneClient:
         self.data.drone_is_doing_action = False
         self.lock.release()
 
+    # mode == 7 : Offboard checking mode
+    async def offboard_check(self):
+        print("# -- Starting offboard mode")
+        try:
+            await self.drone.offboard.start()
+        except OffboardError as error:
+            print(f"Starting offboard mode failed with error code: {error._result.result}")
+            self.lock.acquire()
+            self.data.control_mode = 0
+            self.data.drone_is_doing_action = False
+            self.lock.release()
+            return
+
+        await asyncio.sleep(2)
+
+        print("-- Stopping offboard")
+        try:
+            await self.drone.offboard.stop()
+        except OffboardError as error:
+            print(f"Stopping offboard mode failed with error code: {error._result.result}")
+            self.lock.acquire()
+            self.data.control_mode = 0
+            self.data.drone_is_doing_action = False
+            self.lock.release()
+            return
+
+        self.lock.acquire()
+        self.data.control_mode = 0
+        self.data.drone_is_doing_action = False
+        self.lock.release()
+
+
     async def check_drone_state(self):
         print("#-- Checking Drone State...")
         await asyncio.sleep(1)
@@ -365,14 +410,15 @@ class DroneClient:
 
         print("#-- Waiting for drone to have a global position estimate...")
         async for health in drone.telemetry.health():
+            print(health)
             if health.is_global_position_ok:
                 print("#--- Global position estimate ok")
                 break
 
-        print("# Fetching amsl altitude at home location....")
-        async for terrain_info in drone.telemetry.home():
-            self.absolute_altitude = terrain_info.absolute_altitude_m
-            break
+        # print("# Fetching amsl altitude at home location....")
+        # async for terrain_info in drone.telemetry.home():
+        #     self.absolute_altitude = terrain_info.absolute_altitude_m
+        #     break
 
         return drone
 
@@ -422,12 +468,12 @@ class DroneClient:
 
     async def go_up(self, sec=1):
         await self.drone.offborad.set_velocity_body(
-            VelocityBodyYawspeed(0.0, -1.0, 0.0, 0.0))
+            VelocityBodyYawspeed(0.0, 0.0, 1.0, 0.0))
         await asyncio.sleep(sec)
 
     async def turn_clockwise(self, sec=4):
         await self.drone.offborad.set_velocity_body(
-            VelocityBodyYawspeed(0.0, -1.0, 0.0, 0.0)
+            VelocityBodyYawspeed(0.0, 0.0, 0.0, 60.0)
         )
         await asyncio.sleep(sec)
 
