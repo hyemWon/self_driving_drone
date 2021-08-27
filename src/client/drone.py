@@ -262,26 +262,17 @@ class DroneClient:
 
     # mode == 4 : Keyboard Control mode
     async def action_by_keyboard(self):
-        # print("# -- [Roll] : e,d / [Pitch] : s,f \n# -- [Yaw] : j,l / [Throttle] : i,k\n")
-        # direction, second = input("### Keyboard Input (Direction, second): ").split(sep=' ')
-        # second = int(second)
+        # print("# -- Arming")
+        # await self.drone.action.arm()
+        # await self.drone.set_maximum_speed(20)
+        # # flying_alt = self.absolute_altitude + 10.0
+        # flying_alt = 5.0
+        # await self.drone.action.set_takeoff_altitude(flying_alt)
+        # await asyncio.sleep(1)
         #
-        # print(direction, second)
-        print("# -- Arming")
-        await self.drone.action.arm()
-        await self.drone.set_maximum_speed(20)
-        # flying_alt = self.absolute_altitude + 10.0
-        flying_alt = 5.0
-        await self.drone.action.set_takeoff_altitude(flying_alt)
-        await asyncio.sleep(1)
-
-        print("# -- Taking off")
-        await self.drone.action.takeoff()
-        await asyncio.sleep(10)
-
-        print("# -- Setting initial setpoint")
-        await self.drone.offboard.set_velocity_body(
-            VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
+        # print("# -- Taking off")
+        # await self.drone.action.takeoff()
+        # await asyncio.sleep(10)
 
         print("# -- Starting offboard mode")
         try:
@@ -289,13 +280,17 @@ class DroneClient:
         except OffboardError as error:
             print(f"Starting offboard mode failed with error code: {error._result.result}")
             print("# -- Disarming")
-            await self.drone.action.land()
+            # await self.drone.action.land()
             await self.drone.action.disarm()
             self.lock.acquire()
             self.data.control_mode = 0
             self.data.drone_is_doing_action = False
             self.lock.release()
             return
+
+        print("# -- Setting initial setpoint")
+        await self.drone.offboard.set_velocity_body(
+            VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
 
         ch, prev_ch = '', ''
         # VelocityBodyYawspeed(front(+)/back(-), right(+)/left(-), down(+)/up(-) , clockwise(+)/counterclockwise(-))
@@ -329,8 +324,8 @@ class DroneClient:
                     pass
         await asyncio.sleep(0.2)
 
-        await self.drone.action.land()
-        await asyncio.sleep(10)
+        # await self.drone.action.land()
+        # await asyncio.sleep(10)
         await self.drone.action.disarm()
         await asyncio.sleep(5)
 
