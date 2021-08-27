@@ -154,6 +154,7 @@ class DroneClient:
 
     # mode == 1 : go to gps point
     async def action_goto_gps_point(self, dst_name):
+        print("### --- Start Drone Mode 1 : Go to GPS Point")
         st = time.time()
         err = 0.00005
         await asyncio.sleep(0.01)
@@ -215,6 +216,7 @@ class DroneClient:
 
     # mode == 2 : arming and disarming
     async def action_just_arming_and_disarming(self):
+        print("### --- Start Drone Mode 2 : Arming and disarming")
         await asyncio.sleep(0.01)
 
         print("-- Arming")
@@ -233,6 +235,7 @@ class DroneClient:
 
     # mode == 3 : take off and landing
     async def action_takeoff_and_landing(self):
+        print("### --- Start Drone Mode 3 : Takeoff and landing")
         await asyncio.sleep(0.01)
         print("-- Arming --")
         await self.drone.action.arm()
@@ -264,6 +267,7 @@ class DroneClient:
 
     # mode == 4 : Keyboard Control mode
     async def action_by_keyboard(self):
+        print("### --- Start Drone Mode 4 : Keyboard Mode")
         # print("# -- Arming")
         # await self.drone.action.arm()
         # await self.drone.set_maximum_speed(20)
@@ -339,6 +343,7 @@ class DroneClient:
 
     # mode == 5 : Person Following mode
     async def action_detection_person_and_following(self, drone):
+        print("### --- Start Drone Mode 5 : Detection and Following Mode")
         await asyncio.sleep(0.01)
 
         # while entering command
@@ -355,6 +360,7 @@ class DroneClient:
 
     # mode == 6 : Person recognize mode
     async def recognize_person(self):
+        print("### --- Start Drone Mode 6 : recognition person")
         await asyncio.sleep(0.01)
         pass
         # 1) get information from data
@@ -366,7 +372,7 @@ class DroneClient:
 
     # mode == 7 : Offboard checking mode
     async def offboard_check(self):
-        print("# -- Starting offboard mode")
+        print("### --- Start Drone Mode 7 : Check Offboard Mode")
         try:
             await self.drone.offboard.start()
         except OffboardError as error:
@@ -398,7 +404,7 @@ class DroneClient:
 
     # mode == 8 : Just Landing
     async def action_landing(self):
-        print("# -- ")
+        print("### --- Start Drone Mode 8 : Landing Mode")
         print("# -- Starting offboard mode")
         try:
             await self.drone.offboard.start()
