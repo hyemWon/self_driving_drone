@@ -61,12 +61,13 @@ class DroneClient:
                 self.lock.acquire()
                 lat_drone = self.data.gps_point['current'][0]
                 lng_drone = self.data.gps_point['current'][1]
+                is_run_drone = self.data.drone_is_doing_action
                 self.lock.release()
 
-                # send drone data to server
-                packet_send = str(lat_drone) + '/' + str(lng_drone)
+                packet_send = str(lat_drone) + '/' + str(lng_drone) + '/' + (is_run_drone)
 
                 # print('#D.S# sending drone data to server')
+                # send drone data to server
                 self.sock.sendall((str(len(packet_send))).encode().ljust(8) + packet_send.encode())
 
                 # recv app data from server
@@ -78,7 +79,7 @@ class DroneClient:
                 self.lock.acquire()
                 self.data.gps_point['dst'][0] = float(lat_dst)
                 self.data.gps_point['dst'][1] = float(lng_dst)
-                if control_mode != -1 and self.data.drone_is_doing_action:
+                if not self.data.drone_is_doing_action:
                     self.data.control_mode = int(control_mode)
                 self.lock.release()
 
@@ -128,10 +129,10 @@ class DroneClient:
                     loop.run_until_complete(self.offboard_check())
                 else:
                     print("# -- Command 0 State --")
-                    print("### mode 1 : goto gps point\tmode 2 : just arming/disarming")
-                    print("### mode 3 : take off landing\tmode 4 : moving by keyboard")
-                    print("### mode 5 : detection and following\tmode 6 : recognize person ")
-                    print("### mode 7 : offboard check\tmode 8 : landing")
+                    # print("### mode 1 : goto gps point\t\t mode 2 : just arming/disarming")
+                    # print("### mode 3 : take off landing\t\t mode 4 : moving by keyboard")
+                    # print("### mode 5 : detect and follow\t\t mode 6 : recognize person ")
+                    # print("### mode 7 : offboard check\t\t mode 8 : landing")
                     time.sleep(0.2)  # delay 0.2s
 
                 # Step 4) Set drone mode 0(default) or next mode in async function
