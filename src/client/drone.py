@@ -64,7 +64,7 @@ class DroneClient:
                 is_run_drone = self.data.drone_is_doing_action
                 self.lock.release()
 
-                packet_send = str(lat_drone) + '/' + str(lng_drone) + '/' + (is_run_drone)
+                packet_send = str(lat_drone) + '/' + str(lng_drone) + '/' + str(is_run_drone)
 
                 # print('#D.S# sending drone data to server')
                 # send drone data to server
