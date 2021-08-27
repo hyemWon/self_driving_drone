@@ -127,7 +127,11 @@ class DroneClient:
                 elif flight_mode == 7:
                     loop.run_until_complete(self.offboard_check())
                 else:
-                    print("Command 0 State")
+                    print("# -- Command 0 State --")
+                    print("### mode 1 : goto gps point\tmode 2 : just arming/disarming")
+                    print("### mode 3 : take off landing\tmode 4 : moving by keyboard")
+                    print("### mode 5 : detection and following\tmode 6 : recognize person ")
+                    print("### mode 7 : offboard check\tmode 8 : landing")
                     time.sleep(0.2)  # delay 0.2s
 
                 # Step 4) Set drone mode 0(default) or next mode in async function
@@ -194,7 +198,7 @@ class DroneClient:
 
         print("# -- Landing --")
         await self.drone.action.land()
-        await asyncio.sleep(10)
+        await asyncio.sleep(5)
 
         print("# -- Disarming --")
         await self.drone.action.disarm()
@@ -389,11 +393,44 @@ class DroneClient:
             self.lock.release()
             return
 
+        print("# -- Offboard mode is available")
         self.lock.acquire()
         self.data.control_mode = 0
         self.data.drone_is_doing_action = False
         self.lock.release()
 
+    # mode == 8 : Just Landing
+    async def action_landing(self):
+        print("# -- ")
+        print("# -- Starting offboard mode")
+        try:
+            await self.drone.offboard.start()
+        except OffboardError as error:
+            print(f"Starting offboard mode failed with error code: {error._result.result}")
+            print("# -- Disarming")
+            await self.drone.action.land()
+            await asyncio.sleep(5)
+            await self.drone.action.disarm()
+            await asyncio.sleep(1)
+            self.lock.acquire()
+            self.data.control_mode = 0
+            self.data.drone_is_doing_action = False
+            self.lock.release()
+            return
+
+        await self.drone.offborad.set_velocity_body(
+            VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
+        await asyncio.sleep(2)
+
+        await self.drone.action.land()
+        await asyncio.sleep(10)
+        await self.drone.action.disarm()
+        await asyncio.sleep(5)
+
+        self.lock.acquire()
+        self.data.control_mode = 0
+        self.data.drone_is_doing_action = False
+        self.lock.release()
 
     async def check_drone_state(self):
         print("#-- Checking Drone State...")
@@ -422,7 +459,6 @@ class DroneClient:
         #     self.absolute_altitude = terrain_info.absolute_altitude_m
         #     break
 
-
     def open_pixhawk_server(self):
         print("----OpenServer Thread Start")
         print("----Mavsdk Server Start!----")
@@ -443,50 +479,58 @@ class DroneClient:
 
     # -------------- Keyboard Commands
     async def go_forward(self, sec=1):
-        await self.drone.offborad.set_velocity_body(
-            VelocityBodyYawspeed(1.0, 0.0, 0.0, 0.0))
+        print("go forward")
+        # await self.drone.offborad.set_velocity_body(
+        #     VelocityBodyYawspeed(1.0, 0.0, 0.0, 0.0))
         await asyncio.sleep(sec)
 
     async def go_backward(self, sec=1):
-        await self.drone.offboard.set_velocity_body(
-            VelocityBodyYawspeed(-1.0, 0.0, 0.0, 0.0))
+        print("go backward")
+        # await self.drone.offboard.set_velocity_body(
+        #     VelocityBodyYawspeed(-1.0, 0.0, 0.0, 0.0))
         await asyncio.sleep(sec)
 
     async def go_right(self, sec=1):
-        await self.drone.offborad.set_velocity_body(
-            VelocityBodyYawspeed(0.0, 1.0, 0.0, 0.0))
+        print("go right")
+        # await self.drone.offborad.set_velocity_body(
+        #     VelocityBodyYawspeed(0.0, 1.0, 0.0, 0.0))
         await asyncio.sleep(sec)
 
     async def go_left(self, sec=1):
-        await self.drone.offborad.set_velocity_body(
-            VelocityBodyYawspeed(0.0, -1.0, 0.0, 0.0))
+        print("go left")
+        # await self.drone.offborad.set_velocity_body(
+        #     VelocityBodyYawspeed(0.0, -1.0, 0.0, 0.0))
         await asyncio.sleep(sec)
 
     async def go_down(self, sec=1):
-        await self.drone.offborad.set_velocity_body(
-            VelocityBodyYawspeed(0.0, 0.0, -1.0, 0.0))
+        print("go down")
+        # await self.drone.offborad.set_velocity_body(
+        #     VelocityBodyYawspeed(0.0, 0.0, -1.0, 0.0))
         await asyncio.sleep(sec)
 
     async def go_up(self, sec=1):
-        await self.drone.offborad.set_velocity_body(
-            VelocityBodyYawspeed(0.0, 0.0, 1.0, 0.0))
+        print("go up")
+        # await self.drone.offborad.set_velocity_body(
+        #     VelocityBodyYawspeed(0.0, 0.0, 1.0, 0.0))
         await asyncio.sleep(sec)
 
     async def turn_clockwise(self, sec=4):
-        await self.drone.offborad.set_velocity_body(
-            VelocityBodyYawspeed(0.0, 0.0, 0.0, 60.0)
-        )
+        print("turn clockwise")
+        # await self.drone.offborad.set_velocity_body(
+        #     VelocityBodyYawspeed(0.0, 0.0, 0.0, 60.0)
+        # )
         await asyncio.sleep(sec)
 
     async def turn_counterclockwise(self, sec=4):
-        await self.drone.offborad.set_velocity_body(
-            VelocityBodyYawspeed(0.0, 0.0, 0.0, -60.0)
-        )
+        print("turn counterclockwise")
+        # await self.drone.offborad.set_velocity_body(
+        #     VelocityBodyYawspeed(0.0, 0.0, 0.0, -60.0)
+        # )
         await asyncio.sleep(sec)
 
     async def hold_position(self, sec=2):
-        await self.drone.offborad.set_velocity_body(
-            VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0)
-        )
+        print("hold position")
+        # await self.drone.offborad.set_velocity_body(
+        #     VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0)
+        # )
         await asyncio.sleep(sec)
-

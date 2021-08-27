@@ -54,7 +54,11 @@ class DroneServer:
                 packet = str(dst_lat) + '/' + str(dst_lng) + '/' + str(command)
                 conn.sendall((str(len(packet))).encode().ljust(8) + packet.encode())
 
-                print(lat, lng, dst_lat, dst_lng)
+                if command > 0:
+                    self.lock.acquire()
+                    self.data.control_mode = 0
+                    self.lock.release()
+                print(lat, lng, dst_lat, dst_lng, command)
                 time.sleep(1)
 
             except Exception as e:
