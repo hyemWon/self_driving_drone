@@ -39,8 +39,9 @@ class DroneServer:
                     print("{} packet not received !!".format(self.host_name))
                     continue
                 lat, lng, is_run_drone = packet.decode(encoding='utf-8').split(sep='/')
-                is_run_drone = int(is_run_drone)
+                is_run_drone = bool(is_run_drone)
 
+                print(f"is run drone : {is_run_drone}")
                 self.lock.acquire()
                 # save current drone gps point
                 self.data.gps_point['current'][0], self.data.gps_point['current'][1] = float(lat), float(lng)
@@ -56,7 +57,7 @@ class DroneServer:
                 conn.sendall((str(len(packet))).encode().ljust(8) + packet.encode())
 
                 print(lat, lng, dst_lat, dst_lng, command)
-                time.sleep(1)
+                time.sleep(0.5)
 
             except Exception as e:
                 self.isRun = False
