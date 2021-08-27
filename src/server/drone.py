@@ -39,7 +39,7 @@ class DroneServer:
                     print("{} packet not received !!".format(self.host_name))
                     continue
                 lat, lng, is_run_drone = packet.decode(encoding='utf-8').split(sep='/')
-                is_run_drone = bool(is_run_drone)
+                is_run_drone = int(is_run_drone)
 
                 self.lock.acquire()
                 # save current drone gps point
