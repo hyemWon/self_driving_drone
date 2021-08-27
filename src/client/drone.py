@@ -109,7 +109,8 @@ class DroneClient:
                 self.lock.acquire()
                 flight_mode = self.data.control_mode
                 print(f"Current Drone Mode : {flight_mode}")
-                self.data.drone_is_doing_action = True
+                if flight_mode > 0:
+                    self.data.drone_is_doing_action = True
                 self.lock.release()
 
                 # Step 3)Start action by drone mode
