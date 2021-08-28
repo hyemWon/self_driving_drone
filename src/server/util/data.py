@@ -15,6 +15,7 @@ class Data(Singleton):
 
         # drone control mode
         self.control_mode = 0
+        self.pose = None
 
         # Alpha-pose person skeleton points
         self.skeleton = [

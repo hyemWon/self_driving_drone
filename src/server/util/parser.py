@@ -1,6 +1,7 @@
 import argparse
 import configparser
 import yaml
+import importlib
 from easydict import EasyDict as edict
 
 
@@ -16,16 +17,18 @@ class ConfigParser:
         elif file_type == 'ini' or file_type == 'conf':
             with open(path, 'r') as f:
                 conf = configparser.ConfigParser()
+        elif file_type == 'py':
+            conf = importlib.import_module(path)
 
         if is_edict:
             conf = edict(conf)
 
-        cls.__config = conf
+        return conf
 
     @classmethod
-    def save_config(cls, path):
+    def save_config(cls, config, path):
         with open(path, 'w') as f:
-            cls.__config.write(f)
+            config.write(f)
 
     @classmethod
     def get_config(cls):

@@ -6,19 +6,20 @@ from PIL import Image
 import tensorflow as tf
 from sklearn.base import BaseEstimator, TransformerMixin
 
-try:
-    import json
-    import torch
-    import trt_pose.coco
-    import trt_pose.models
-    from torch2trt import TRTModule
-    import torchvision.transforms as transforms
-    from trt_pose.parse_objects import ParseObjects
-except:
-    pass
+# try:
+#     import json
+#     import torch
+#     import trt_pose.coco
+#     import trt_pose.models
+#     from torch2trt import TRTModule
+#     import torchvision.transforms as transforms
+#     from trt_pose.parse_objects import ParseObjects
+# except:
+#     pass
+
 
 class PoseExtractor(BaseEstimator, TransformerMixin):
-    def __init__(self, model_path='./models/pose.tflite'):
+    def __init__(self, model_path='/models/pose.tflite'):
         self.model_path = model_path
         self.interpreter = tf.lite.Interpreter(model_path=self.model_path)
         self.interpreter.allocate_tensors()
@@ -62,7 +63,7 @@ class PoseExtractor(BaseEstimator, TransformerMixin):
 class TRTPoseExtractor(BaseEstimator, TransformerMixin):
     def __init__(self, model_path='./models/resnet18_baseline_att_224x224_A_epoch_249_trt.pth'):
         self.model_path = model_path
-        with open('./models/human_pose.json', 'r') as f:
+        with open('../../src/server/util/actionai/models/human_pose.json', 'r') as f:
             self.human_pose = json.load(f)
         self.topology = trt_pose.coco.coco_category_to_topology(self.human_pose)
         self.model_trt = TRTModule()
