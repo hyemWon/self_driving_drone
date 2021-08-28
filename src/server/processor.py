@@ -1,10 +1,10 @@
 import asyncio
 import threading
-
 import numpy as np
 
 from util.data import Data, FrameQueue
-from util.skeleton_inference import AlphaPoseDetector
+from util.writer import ImageWriter
+# from util.skeleton_inference import AlphaPoseDetector
 from util.person_tracking import PersonTracker
 import time
 
@@ -13,6 +13,8 @@ class ImageProcessor:
     def __init__(self):
         self.host_name = 'Image Processor'
         self.frame_queue = FrameQueue().instance()
+        # self.writer = ImageWriter()
+        # -- Detectors
         self.person_detector = PersonTracker()
         self.alpha_pose_detector = None     # AlphaPoseDetector()
         self.obstacle_detector = None       # ObstacleDetector()
@@ -39,6 +41,7 @@ class ImageProcessor:
             except Exception as e:
                 print(e)
                 self.isRun = False
+                # self.writer.run()
                 print("-------- Close {}".format(self.host_name))
 
     async def start_processing(self, frame):
