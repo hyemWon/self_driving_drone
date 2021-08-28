@@ -7,6 +7,7 @@ def most_frequent(pred):
     max_idx = count_list.index(max(count_list))
     return pred[max_idx]
 
+
 if __name__ == '__main__':
     import cv2
     import pickle

@@ -9,10 +9,10 @@ from controller import gmap, user, drone
 
 class ManageServer:
     def __init__(self):
-        # self.rs_server = RealSenseServer()
+        self.rs_server = RealSenseServer()
         # self.seek_thermal_server = SeekThermalServer()
         self.drone_server = DroneServer()
-        # self.processor = ImageProcessor()
+        self.processor = ImageProcessor()
 
         self.app = Flask(__name__)
         self.app.register_blueprint(gmap.blue_gmap)
@@ -21,10 +21,10 @@ class ManageServer:
 
     def run(self):
         remove_all_img()                # remove rgb/depth/thermal/alpha-pose/person image
-        # self.rs_server.run()            # realsense thread start
+        self.rs_server.run()            # realsense thread start
         # self.seek_thermal_server.run()  # seek_thermal thread start
         self.drone_server.run()         # drone thread start
-        # self.processor.run()
+        self.processor.run()
 
         print('')
         self.app.run(host='141.223.122.51', port=50000)
@@ -33,3 +33,4 @@ class ManageServer:
 if __name__ == '__main__':
     manager = ManageServer()
     manager.run()
+

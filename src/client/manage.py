@@ -7,12 +7,12 @@ class ManageClient:
     def __init__(self):
         self.rs_client = RealSenseClient()
         # self.seek_thermal_client = SeekThermalClient()
-        self.drone_client = DroneClient()
+        # self.drone_client = DroneClient()
 
     def run(self):
         self.rs_client.run()
         # self.seek_thermal_client.run()    # not using seek thermal camera
-        self.drone_client.run()
+        # self.drone_client.run()
 
 
 if __name__ == '__main__':

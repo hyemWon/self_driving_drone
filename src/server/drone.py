@@ -39,7 +39,7 @@ class DroneServer:
                     print("{} packet not received !!".format(self.host_name))
                     continue
                 lat, lng, is_run_drone = packet.decode(encoding='utf-8').split(sep='/')
-                is_run_drone = bool(is_run_drone)
+                is_run_drone = (is_run_drone == 'True')
 
                 print(f"is run drone : {is_run_drone}")
                 self.lock.acquire()
@@ -47,9 +47,10 @@ class DroneServer:
                 self.data.gps_point['current'][0], self.data.gps_point['current'][1] = float(lat), float(lng)
 
                 dst_lat, dst_lng = self.data.gps_point['dst'][0], self.data.gps_point['dst'][1]
-                command = self.data.control_mode
+
                 if is_run_drone:
-                    command = 0
+                    self.data.control_mode = 0
+                command = self.data.control_mode
                 self.lock.release()
 
                 # Send to Drone(Client) destination gps, control mode
