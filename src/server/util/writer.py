@@ -6,22 +6,34 @@ import datetime
 
 
 class ImageWriter:
-    def __init__(self):
-        self.writer = cv2.VideoWriter()
-        self.path = self.get_paths()
-        self.zippath = self.path
+    def __init__(self, _name, _fps, _size):
+        self.name = _name
+        self.fps = _fps
+        self.size = _size
+        self.fourcc = cv2.VideoWriter_fourcc(*'DIVX')
+        self.base_path = os.getcwd()
+        self.timestamp = datetime.datetime.now().strftime("%y%m%d_%H%M%S")
+        self.video_base_path = "/home/piai/PycharmProjects/self_driving_drone/video"
+        # self.zip_path =
+        self.video_output_path = "/home/piai/PycharmProjects/self_driving_drone/video/{}".format(self.timestamp)
+        self.makedir()
+
+        self.video_writer = cv2.VideoWriter(os.path.join(self.video_output_path, f"{self.name}.avi"),
+                                            self.fourcc, self.fps, self.size)
 
     def get_paths(self):
         base_path = os.getcwd()
         return base_path
 
-    def frame_to_video(self):
-        pass
+    def video_write(self, frame):
+        self.video_writer.write(frame)
 
-    def make_zip(self):
-        timestamp = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
-        shutil.make_archive(timestamp, 'zip', self.zippath)
+    def makedir(self):
+        if not os.path.isdir(self.video_base_path):
+            os.mkdir(self.video_base_path)
+        if not os.path.isdir(self.video_output_path):
+            os.mkdir(self.video_output_path)
 
-    def run(self):
-        self.frame_to_video()
-        self.make_zip()
+    @classmethod
+    def image_write(cls, _fname, _frame):
+        cv2.imwrite(_fname, _frame)

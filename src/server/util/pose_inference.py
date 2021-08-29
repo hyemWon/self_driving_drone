@@ -23,6 +23,7 @@ class PoseDetector:
         self.extractor = PoseExtractor(model_path=self.model_path)
 
         self.count = 0
+        self.gather = 10
         self.pred = []
 
     def run_inference(self, frame):
@@ -33,7 +34,7 @@ class PoseDetector:
         prediction = self.model.predict(sample.reshape(1, -1))
         self.pred.append(prediction[0])
 
-        if self.count == 16:
+        if self.count == self.gather:
             pose = self.most_frequent()
 
             self.lock.acquire()
@@ -46,7 +47,7 @@ class PoseDetector:
             print(f"## {pose} pose detected!!")
             return pose
 
-        cv2.imwrite(os.path.join(self.write_path, f"frame{self.count}.jpg"), frame)
+        # cv2.imwrite(os.path.join(self.write_path, f"frame{self.count}.jpg"), frame)
 
         return None
 
