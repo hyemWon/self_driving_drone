@@ -4,14 +4,18 @@ import imutils
 import numpy as np
 import os
 from .centroidtracker import CentroidTracker
+from .writer import ImageWriter
 
 
 class PersonTracker:
     def __init__(self):
+        self.name = 'person'
         self.proto_path = os.path.join(os.getcwd(), "util/mobilenet/MobileNetSSD_deploy.prototxt")
         self.model_path = os.path.join(os.getcwd(), "util/mobilenet/MobileNetSSD_deploy.caffemodel")
-        self.write_path = os.path.join(os.getcwd(), "imgs", "person")
+        self.write_path = os.path.join(os.getcwd(), "imgs", self.name)
+
         self.detector = cv2.dnn.readNetFromCaffe(prototxt=self.proto_path, caffeModel=self.model_path)
+
         # Only enable it if you are using OpenVino environment
         # detector.setPreferableBackend(cv2.dnn.DNN_BACKEND_INFERENCE_ENGINE)
         # detector.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
@@ -136,9 +140,9 @@ class PersonTracker:
         # frame 출력
         cv2.imwrite(os.path.join(self.write_path, f"frame{self.frame_cnt}.jpg"), frame)
         self.frame_cnt += 1
-        cv2.waitKey(1)
+        # cv2.waitKey(1)
 
         if len(objects) > 0:
-            return objects[self.objectId]
+            return [self.objectId, objects[self.objectId]]
         else:
-            return [0]
+            return None
