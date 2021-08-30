@@ -308,6 +308,7 @@ class DroneClient:
                 await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
                 await asyncio.sleep(1)
 
+
                 if ch == 'e':
                     await self.go_forward()
                 elif ch == 'd':
@@ -480,7 +481,7 @@ class DroneClient:
         await asyncio.sleep(1)
 
         self.drone = System(mavsdk_server_address='localhost', port=50051)
-        await self.drone.connect(system_address='serial:///dev/ttyASM0:57600')
+        await self.drone.connect(system_address='serial:///dev/ttyTHS1:921600')
 
         print("#-- Waiting for drone to connect...")
         async for state in self.drone.core.connection_state():
