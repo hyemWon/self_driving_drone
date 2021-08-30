@@ -36,7 +36,9 @@ class RealSenseServer:
                 data = np.fromstring(stringData, dtype='uint8')     # convert to numpy array
 
                 frame = cv2.imdecode(data, cv2.IMREAD_COLOR)
+
                 self.frame_queue.push(frame)
+                #cv2.waitKey(5)
 
                 # print("#RS# process finished {}".format(time.time() - st))
 
