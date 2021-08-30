@@ -44,7 +44,7 @@ class ImageProcessor:
                     cv2.imwrite("imgs/rgb/frame_{}.jpg".format(self.cnt), frame)    # write frame image
                     self.origin_video_writer.video_write(frame)                     # write video
 
-                    print(f"#IP# process finished {time.time()-st}")
+                    # print(f"#IP# process finished {time.time()-st}")
                     self.cnt += 1
                 time.sleep(0.01)
             except Exception as e:
@@ -86,12 +86,12 @@ class ImageProcessor:
         #                      self.obstacle_processing(results[2]))
 
     async def person_detection(self, frame):
-        # try:
-        #     return self.person_detector.run(frame)
-        # except Exception as e:
-        #     print(f'# person detection error\n## {e}')
-        #     return None*-
-        return None
+        try:
+            return self.person_detector.run(frame)
+        except Exception as e:
+            print(f'# person detection error\n## {e}')
+            return None
+        # return None
 
     async def pose_detection(self, frame):
         try:
