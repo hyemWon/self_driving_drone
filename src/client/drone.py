@@ -280,8 +280,8 @@ class DroneClient:
         # await self.drone.action.takeoff()
         # await asyncio.sleep(10)
 
-        print("# -- Starting offboard mode")
         try:
+            print("# -- Starting offboard mode")
             await self.drone.offboard.start()
         except OffboardError as error:
             print(f"Starting offboard mode failed with error code: {error._result.result}")
@@ -373,10 +373,34 @@ class DroneClient:
     # mode == 7 : Offboard checking mode
     async def offboard_check(self):
         print("### --- Start Drone Mode 7 : Check Offboard Mode")
+        await asyncio.sleep(0.01)
+        print("-- Arming --")
+        await self.drone.action.arm()
+        await asyncio.sleep(5)
+
+        print("-- Set take off altitude --")
+        # flying_alt = self.absolute_altitude + 5.0
+        flying_alt = 3.0
+        await self.drone.action.set_takeoff_altitude(flying_alt)
+        await asyncio.sleep(2)
+
+        print("-- Taking off --")
+        await self.drone.action.takeoff()
+        await asyncio.sleep(6)
+
         try:
+            print("# -- Starting offboard mode")
             await self.drone.offboard.start()
         except OffboardError as error:
             print(f"Starting offboard mode failed with error code: {error._result.result}")
+            print("-- Landing --")
+            await self.drone.action.land()
+            await asyncio.sleep(15)
+
+            print("-- Disarming --")
+            await self.drone.action.disarm()
+            await asyncio.sleep(5)
+
             self.lock.acquire()
             self.data.control_mode = 0
             self.data.drone_is_doing_action = False
@@ -385,16 +409,32 @@ class DroneClient:
 
         await asyncio.sleep(2)
 
-        print("-- Stopping offboard")
         try:
             await self.drone.offboard.stop()
+            print("-- Stopping offboard")
         except OffboardError as error:
             print(f"Stopping offboard mode failed with error code: {error._result.result}")
+            print("-- Landing --")
+            await self.drone.action.land()
+            await asyncio.sleep(15)
+
+            print("-- Disarming --")
+            await self.drone.action.disarm()
+            await asyncio.sleep(5)
+
             self.lock.acquire()
             self.data.control_mode = 0
             self.data.drone_is_doing_action = False
             self.lock.release()
             return
+
+        print("-- Landing --")
+        await self.drone.action.land()
+        await asyncio.sleep(15)
+
+        print("-- Disarming --")
+        await self.drone.action.disarm()
+        await asyncio.sleep(5)
 
         print("# -- Offboard mode is available")
         self.lock.acquire()
@@ -440,7 +480,7 @@ class DroneClient:
         await asyncio.sleep(1)
 
         self.drone = System(mavsdk_server_address='localhost', port=50051)
-        await self.drone.connect(system_address='serial:///dev/ttyTHS1:921600')
+        await self.drone.connect(system_address='serial:///dev/ttyASM0:57600')
 
         print("#-- Waiting for drone to connect...")
         async for state in self.drone.core.connection_state():

@@ -43,6 +43,8 @@ class ImageProcessor:
                     asyncio.run(self.start_processing(frame.copy()))
                     cv2.imwrite("imgs/rgb/frame_{}.jpg".format(self.cnt), frame)    # write frame image
                     self.origin_video_writer.video_write(frame)                     # write video
+
+                    cv2.imshow("Frame", frame)
                     cv2.waitKey(1)
                     # print(f"#IP# process finished {time.time()-st}")
                     self.cnt += 1
