@@ -34,7 +34,7 @@ class RealSenseClient:
 
         self.isRun = True
         t = threading.Thread(target=self.thread)
-        # t.daemon = True
+        t.daemon = True
         t.start()
 
     def thread(self):
@@ -68,7 +68,7 @@ class RealSenseClient:
                 # string_data = np.array(frame).tostring()
                 # s.sendall((str(len(string_data))).encode().ljust(8) + string_data)
 
-                time.sleep(0.01)
+                time.sleep(0.001)
 
                 print('#RS# realsense job finished {}'.format(time.time() - st))
 
