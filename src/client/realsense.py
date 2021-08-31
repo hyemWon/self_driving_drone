@@ -25,7 +25,7 @@ class RealSenseClient:
 
     def run(self):
         # 1920x1080 - 30, 15, 6 fps / 1280x720 - 60, 30, 15, 6 fps / 960x540 - 60, 30, 15, 6 fps
-        width, height, fps = 960, 540, 30
+        width, height, fps = 960, 540, 15
         # self.config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
         self.config.enable_stream(rs.stream.color, width, height, rs.format.bgr8, fps)
 
@@ -70,7 +70,7 @@ class RealSenseClient:
 
                 time.sleep(0.001)
 
-                print('#RS# realsense job finished {}'.format(time.time() - st))
+                # print('#RS# realsense job finished {}'.format(time.time() - st))
 
             except Exception as e:
                 self.isRun = False

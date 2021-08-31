@@ -5,7 +5,7 @@ import cv2
 import numpy as np
 
 from util.data import Data, FrameQueue
-from util.pose_inference import PoseDetector
+from util.actionai_pose_inference import ActionAIPoseDetector
 from util.person_tracking import PersonTracker
 from util.writer import ImageWriter
 import time
@@ -17,7 +17,7 @@ class ImageProcessor:
         self.frame_queue = FrameQueue().instance()
         # -- Detectors
         self.person_detector = PersonTracker()
-        self.action_ai_pose_detector = PoseDetector()
+        self.action_ai_pose_detector = ActionAIPoseDetector()
         self.obstacle_detector = None       # ObstacleDetector()
 
         self.origin_video_writer = ImageWriter('original', 10.0, (960, 540))
