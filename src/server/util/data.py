@@ -1,6 +1,7 @@
 from .singleton import Singleton
-from threading import Lock
+from multiprocessing import Value, Array, Lock
 from collections import deque
+import threading
 
 
 class Data(Singleton):
@@ -17,10 +18,8 @@ class Data(Singleton):
         self.control_mode = 0
         self.pose = None
 
-        # Alpha-pose person skeleton points
-        self.skeleton = [
-
-        ]
+        # User certification
+        self.is_pass_certification = False
 
         # yolo detection person boxes
         self.person_boxes = {
@@ -34,13 +33,13 @@ class Data(Singleton):
         }
 
         # thread lock
-        self.lock = Lock()
+        self.lock = threading.Lock()
 
 
 class FrameQueue(Singleton):
     def __init__(self):
         self.queue = deque()
-        self.lock = Lock()
+        self.lock = threading.Lock()
 
     def push(self, data):
         self.lock.acquire()
@@ -56,3 +55,9 @@ class FrameQueue(Singleton):
         self.lock.release()
 
         return data
+
+
+# class ProcessData(Singleton):
+#     def __init__(self):
+#         self.detection_is_run = Value('i', 0, True)
+#         self.
