@@ -5,6 +5,7 @@ import numpy as np
 import os
 from .centroidtracker import CentroidTracker
 from .writer import ImageWriter
+from .data import Data
 
 
 class PersonTracker:
@@ -15,7 +16,7 @@ class PersonTracker:
         self.write_path = os.path.join(os.getcwd(), "imgs", self.name)
 
         self.detector = cv2.dnn.readNetFromCaffe(prototxt=self.proto_path, caffeModel=self.model_path)
-
+        self.data = Data().instance()
         # Only enable it if you are using OpenVino environment
         # detector.setPreferableBackend(cv2.dnn.DNN_BACKEND_INFERENCE_ENGINE)
         # detector.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
@@ -28,6 +29,7 @@ class PersonTracker:
         self.tracker = CentroidTracker(maxDisappeared=80, maxDistance=90)
         self.objectId = 0
         self.frame_cnt = 0
+        self.person_crops = []
 
     def non_max_suppression_fast(self, boxes, overlapThresh):
         try:
@@ -118,6 +120,32 @@ class PersonTracker:
         rects = self.non_max_suppression_fast(boundingboxes, 0.3)
 
         objects = self.tracker.update(rects)
+
+        self.data.lock.acquire()
+        certification_Id = self.data.certification_Id
+        self.data.lock.release()
+
+        # ---- with certification
+        # if certification_Id < 0:
+        #     # 인증되기 전에는 검출된 모든 사람의 박스 출력
+        #     for (objectId, bbox) in objects.items():
+        #         x1, y1, x2, y2 = bbox
+        #         x1 = int(x1)
+        #         y1 = int(y1)
+        #         x2 = int(x2)
+        #         y2 = int(y2)
+        #
+        #         text = "ID: {}".format(objectId)
+        #         cv2.putText(frame, text, (x1, y1 - 5), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 255), 1)
+        #         cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
+        # else:
+        #     # 인증 되고 나서는 해당 사람만 박싱해서 보여준다.
+        #     x1, y1, x2, y2 = objects[certification_Id]
+        #     text = f"ID: {certification_Id}"
+        #     cv2.putText(frame, text, (x1, y1 - 5), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 255), 1)
+        #     cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
+
+        # -- no certification
         for (objectId, bbox) in objects.items():
             x1, y1, x2, y2 = bbox
             x1 = int(x1)
@@ -131,18 +159,20 @@ class PersonTracker:
             # 만약 사용자가 손을 든다면 (openpose)
             # 그 사용자의 objectID를 기억해서 그 사용자만 추적하기(?)
             if objectId == 2:
-                self.objectId = 2
                 # bounding box 출력
                 cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
                 # text = "ID: {}".format(objectId)
                 cv2.putText(frame, text, (x1, y1-5), cv2.FONT_HERSHEY_COMPLEX_SMALL, 1, (0, 0, 255), 1)
 
-        # frame 출력
+        # frame write
         cv2.imwrite(os.path.join(self.write_path, f"frame{self.frame_cnt}.jpg"), frame)
         self.frame_cnt += 1
         # cv2.waitKey(1)
 
         if len(objects) > 0:
-            return [self.objectId, objects[self.objectId]]
+            if certification_Id >= 0:   # Pass certification
+                return [objects[certification_Id]]
+            else:
+                return [objects]
         else:
             return None

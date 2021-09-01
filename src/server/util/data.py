@@ -19,7 +19,7 @@ class Data(Singleton):
         self.pose = None
 
         # User certification
-        self.is_pass_certification = False
+        self.certification_Id = -1
 
         # yolo detection person boxes
         self.person_boxes = {

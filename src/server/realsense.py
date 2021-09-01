@@ -40,7 +40,7 @@ class RealSenseServer:
                 self.frame_queue.push(frame)
                 #cv2.waitKey(5)
 
-                # print("#RS# process finished {}".format(time.time() - st))
+                print("#RS# process finished {}".format(time.time() - st))
 
             except Exception as e:
                 self.isRun = False

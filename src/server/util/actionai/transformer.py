@@ -103,41 +103,41 @@ class PoseExtractor(BaseEstimator, TransformerMixin):
 #
 #         return np.array(feat_array).squeeze()
 
-class GetKeypoints(object):
-    def __init__(self, topology):
-        self.topology = topology
-        self.body_labels = {0:'nose', 1: 'lEye', 2: 'rEye', 3:'lEar', 4:'rEar', 5:'lShoulder', 6:'rShoulder',
-               7:'lElbow', 8:'rElbow', 9:'lWrist', 10:'rWrist', 11:'lHip', 12:'rHip', 13:'lKnee', 14:'rKnee',
-              15:'lAnkle', 16:'rAnkle', 17:'neck'}
-        self.body_parts = sorted(self.body_labels.values())
-
-    def __call__(self, image, object_counts, objects, normalized_peaks):
-        topology = self.topology
-        height = image.shape[0]
-        width = image.shape[1]
-
-        K = topology.shape[0]
-        count = int(object_counts[0])
-        if count > 1:
-            count = 1
-        K = topology.shape[0]
-        
-        body_dict = {}
-        feature_vec = []
-        for i in range(count):
-            obj = objects[0][i]
-            C = obj.shape[0]
-            for j in range(C):
-                k = int(obj[j])
-                if k >= 0:
-                    peak = normalized_peaks[0][j][k]
-                    x = round(float(peak[1]) * width)
-                    y = round(float(peak[0]) * height)
-                    body_dict[self.body_labels[j]] = [x,y]
-        for part in self.body_parts:
-            feature_vec.append(body_dict.get(part, [0,0]))
-        feature_vec = [item for sublist in feature_vec for item in sublist]
-        return feature_vec
+# class GetKeypoints(object):
+#     def __init__(self, topology):
+#         self.topology = topology
+#         self.body_labels = {0:'nose', 1: 'lEye', 2: 'rEye', 3:'lEar', 4:'rEar', 5:'lShoulder', 6:'rShoulder',
+#                7:'lElbow', 8:'rElbow', 9:'lWrist', 10:'rWrist', 11:'lHip', 12:'rHip', 13:'lKnee', 14:'rKnee',
+#               15:'lAnkle', 16:'rAnkle', 17:'neck'}
+#         self.body_parts = sorted(self.body_labels.values())
+#
+#     def __call__(self, image, object_counts, objects, normalized_peaks):
+#         topology = self.topology
+#         height = image.shape[0]
+#         width = image.shape[1]
+#
+#         K = topology.shape[0]
+#         count = int(object_counts[0])
+#         if count > 1:
+#             count = 1
+#         K = topology.shape[0]
+#
+#         body_dict = {}
+#         feature_vec = []
+#         for i in range(count):
+#             obj = objects[0][i]
+#             C = obj.shape[0]
+#             for j in range(C):
+#                 k = int(obj[j])
+#                 if k >= 0:
+#                     peak = normalized_peaks[0][j][k]
+#                     x = round(float(peak[1]) * width)
+#                     y = round(float(peak[0]) * height)
+#                     body_dict[self.body_labels[j]] = [x,y]
+#         for part in self.body_parts:
+#             feature_vec.append(body_dict.get(part, [0,0]))
+#         feature_vec = [item for sublist in feature_vec for item in sublist]
+#         return feature_vec
 
 if __name__ == '__main__':
     extractor = PoseExtractor()
