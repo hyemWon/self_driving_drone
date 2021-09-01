@@ -70,7 +70,7 @@ class RealSenseClient:
 
                 time.sleep(0.001)
 
-                print(f'#Realsense Socket# job finished {time.time() - st}')
+                # print('#RS# realsense job finished {}'.format(time.time() - st))
 
             except Exception as e:
                 self.isRun = False
