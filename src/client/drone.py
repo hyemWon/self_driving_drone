@@ -36,18 +36,18 @@ class DroneClient:
         self.isRunSocket = True
         # sending data to server
         ts = threading.Thread(target=self.thread_socket)
-        ts.daemon = True
+        # ts.daemon = True
 
         self.isRunDrone = True
         # drone controlling thread
         td = threading.Thread(target=self.thread_drone)
 
-        tm.start()
-        time.sleep(0.5)
+        # tm.start()
+        # time.sleep(0.5)
         ts.start()
         time.sleep(0.001)
-        td.start()
-        time.sleep(0.001)
+        # td.start()
+        # time.sleep(0.001)
 
     def thread_socket(self):
         print("-------- {} start".format(self.host_name))
@@ -84,7 +84,7 @@ class DroneClient:
                 self.lock.release()
 
                 time.sleep(0.05)
-                print('#D.S# socket job finished {}'.format(self.host_name, time.time() - st))
+                print(f'#Drone Socket# Jop finished {time.time() - st}')
                 print(lat_drone, lng_drone, lat_dst, lng_dst)
             except Exception as e:
                 self.isRunSocket = False
@@ -498,10 +498,10 @@ class DroneClient:
             #     break
             break
 
-        # print("# Fetching amsl altitude at home location....")
-        # async for terrain_info in drone.telemetry.home():
-        #     self.absolute_altitude = terrain_info.absolute_altitude_m
-        #     break
+        print("# Fetching amsl altitude at home location....")
+        async for terrain_info in self.drone.telemetry.home():
+            self.absolute_altitude = terrain_info.absolute_altitude_m
+            break
 
     def open_pixhawk_server(self):
         print("----OpenServer Thread Start")

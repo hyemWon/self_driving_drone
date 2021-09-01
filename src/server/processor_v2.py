@@ -8,13 +8,14 @@ from util.data import Data, FrameQueue
 from util.actionai_pose_inference import ActionAIPoseDetector
 from util.person_tracking import PersonTracker
 from util.writer import ImageWriter
+from util.data import Data
 import time
 
 
 class ImageProcessor:
     def __init__(self):
         self.host_name = 'Image Processor'
-        self.frame_queue = FrameQueue.instance()
+        self.frame_queue = FrameQueue().instance()
         # -- Detectors
         self.person_detector = PersonTracker()
         self.action_ai_pose_detector = ActionAIPoseDetector()
@@ -22,6 +23,7 @@ class ImageProcessor:
 
         self.origin_video_writer = ImageWriter('original', 10.0, (960, 540))
         self.result_video_writer = ImageWriter('result', 10.0, (960, 540))
+        self.data = Data().instance()
         self.isRun = False
         self.cnt = 0
 
@@ -33,6 +35,7 @@ class ImageProcessor:
 
     def thread(self):
         print(f"-------- {self.host_name} start")
+
         # start image processing
         while self.isRun:
             try:
@@ -59,19 +62,20 @@ class ImageProcessor:
         person_frame = frame.copy()
         pose_frame = frame.copy()
         obstacle_frame = frame.copy()
+
         result = await asyncio.gather(self.person_detection(person_frame),
                                       self.pose_detection(pose_frame),
                                       self.obstacle_detection(obstacle_frame))
 
         if result[0] is not None:
             # cropping person image
-
-            x1, y1, x2, y2 = result[0][1][0], result[0][1][1], result[0][1][2], result[0][1][3]
-            x1, x2 = int(x1 * 1.6), int(x2 * 1.6)
-            y1, y2 = int(y2 * 1.2), int(y2 * 1.2)
-            cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
-            text = f"ID: {result[0][0]}"
-            cv2.putText(frame, text, (x1, y1 - 5), cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.5, (0, 0, 255), 1)
+            for p in result[0]:
+                x1, y1, x2, y2 = p[0], p[1], p[2], p[3]
+                x1, x2 = int(x1 * 1.6), int(x2 * 1.6)
+                y1, y2 = int(y2 * 1.2), int(y2 * 1.2)
+                cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 0, 255), 2)
+                text = f"ID: {result[0][0]}"
+                cv2.putText(frame, text, (x1, y1 - 5), cv2.FONT_HERSHEY_COMPLEX_SMALL, 0.5, (0, 0, 255), 1)
 
         if result[1] is not None:
             text = f"Action : {result[1]}"
@@ -81,7 +85,6 @@ class ImageProcessor:
             pass
 
         self.result_video_writer.video_write(frame)
-        cv2.imshow("boxing result", frame)
         cv2.waitKey(1)
         print(f'#IM# {time.time() - st}', result)
         # await asyncio.gather(self.person_processing(results[0]),
@@ -105,13 +108,4 @@ class ImageProcessor:
         # return []
 
     async def obstacle_detection(self, frame):
-        return None
-
-    async def person_processing(self, person):
-        return None
-
-    async def skeleton_processing(self, skeleton):
-        return None
-
-    async def obstacle_processing(self, obstacle):
         return None

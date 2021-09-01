@@ -10,6 +10,7 @@ from .data import Data
 class ActionAIPoseDetector:
     def __init__(self):
         self.name = 'Action AI Pose Detector'
+
         self.data = Data().instance()
         self.lock = self.data.lock
 
@@ -26,6 +27,7 @@ class ActionAIPoseDetector:
         self.gather = 10
         self.pred = []
 
+
     def run_inference(self, frame):
         self.count += 1
 
@@ -37,15 +39,18 @@ class ActionAIPoseDetector:
         if self.count == self.gather:
             pose = self.most_frequent()
 
+
             self.lock.acquire()
             self.data.pose = pose
             self.lock.release()
+
 
             self.count = 0
             self.pred = []
 
             print(f"## {pose} pose detected!!")
             return pose
+
 
         # cv2.imwrite(os.path.join(self.write_path, f"frame{self.count}.jpg"), frame)
 

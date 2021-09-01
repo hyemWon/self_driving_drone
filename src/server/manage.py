@@ -5,6 +5,7 @@ from drone import DroneServer
 from processor import ImageProcessor
 from util.cleaner import remove_all_img
 from controller import gmap, user, drone
+from util.firebase import FireBase
 
 
 class ManageServer:
@@ -15,6 +16,7 @@ class ManageServer:
         self.processor = ImageProcessor()
 
         self.app = Flask(__name__)
+        self.fb = FireBase()
         self.app.register_blueprint(gmap.blue_gmap)
         self.app.register_blueprint(user.blue_user)
         self.app.register_blueprint(drone.blue_drone)

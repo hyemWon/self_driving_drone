@@ -8,8 +8,9 @@ blue_drone = Blueprint("drone", __name__, url_prefix="/drone")
 data = Data().instance()
 
 
-@blue_drone.route("/gps", methods=['GET'])
+@blue_drone.route("/gps/setpoint", methods=['GET'])
 def gps():
+
     data.lock.acquire()
     lat = data.gps_point['current'][0]
     lng = data.gps_point['current'][1]
