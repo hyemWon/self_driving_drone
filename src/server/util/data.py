@@ -28,9 +28,7 @@ class Data(Singleton):
         }
 
         # drone controlling signal
-        self.control_information = {
-
-        }
+        self.control_information = [0, 0, 0, 0]
 
         # thread lock
         self.lock = threading.Lock()

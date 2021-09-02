@@ -32,6 +32,7 @@ class DroneServer:
 
         while self.isRun:
             try:
+                st = time.time()
                 header = conn.recv(8)
                 packet = conn.recv(int(header))
 
@@ -57,7 +58,8 @@ class DroneServer:
                 packet = str(dst_lat) + '/' + str(dst_lng) + '/' + str(command)
                 conn.sendall((str(len(packet))).encode().ljust(8) + packet.encode())
 
-                print(lat, lng, dst_lat, dst_lng, command)
+                print(f'#Drone Socket# Jop finished {time.time() - st}')
+                print('### Result : ', lat, lng, dst_lat, dst_lng, command)
                 time.sleep(0.5)
 
             except Exception as e:
