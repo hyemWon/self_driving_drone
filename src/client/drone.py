@@ -85,7 +85,7 @@ class DroneClient:
 
                 time.sleep(0.05)
                 print(f'#Drone Socket# Jop finished {time.time() - st}')
-                print(lat_drone, lng_drone, lat_dst, lng_dst)
+                print('### Result : ', lat_drone, lng_drone, lat_dst, lng_dst)
             except Exception as e:
                 self.isRunSocket = False
                 print(e)

@@ -38,6 +38,6 @@ def command():
     })
 
 
-@blue_drone.route("/dst")
-def dst():
-    lat = request.args.get('lat', )
+# @blue_drone.route("/dst")
+# def dst():
+#     lat = request.args.get('lat', )
