@@ -16,11 +16,14 @@ class DroneClient:
         self.address = './mavsdk_server -p 50051 serial:///dev/ttyTHS1:921600'
         self.script_path = '~/self_driving_drone/scripts/'
 
+        # socket
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+        # shared data
         self.data = Data().instance()
         self.lock = self.data.lock
 
+        # thread flag
         self.isRunSocket = False
         self.isRunDrone = False
 
@@ -42,12 +45,12 @@ class DroneClient:
         # drone controlling thread
         td = threading.Thread(target=self.thread_drone)
 
-        # tm.start()
-        # time.sleep(0.5)
+        tm.start()
+        time.sleep(0.5)
         ts.start()
         time.sleep(0.001)
-        # td.start()
-        # time.sleep(0.001)
+        td.start()
+        time.sleep(0.001)
 
     def thread_socket(self):
         print("-------- {} start".format(self.host_name))
@@ -64,6 +67,7 @@ class DroneClient:
                 is_run_drone = self.data.drone_is_doing_action
                 self.lock.release()
 
+                # data packing to string
                 packet_send = str(lat_drone) + '/' + str(lng_drone) + '/' + str(is_run_drone)
 
                 # print('#D.S# sending drone data to server')
@@ -76,6 +80,7 @@ class DroneClient:
                 packet_recv = self.recvall(int(header))
                 lat_dst, lng_dst, control_mode = packet_recv.decode(encoding='utf-8').split(sep='/')
 
+                # save data to shared data
                 self.lock.acquire()
                 self.data.gps_point['dst'][0] = float(lat_dst)
                 self.data.gps_point['dst'][1] = float(lng_dst)
@@ -268,17 +273,17 @@ class DroneClient:
     # mode == 4 : Keyboard Control mode
     async def action_by_keyboard(self):
         print("### --- Start Drone Mode 4 : Keyboard Mode")
-        # print("# -- Arming")
-        # await self.drone.action.arm()
-        # await self.drone.set_maximum_speed(20)
-        # # flying_alt = self.absolute_altitude + 10.0
-        # flying_alt = 5.0
-        # await self.drone.action.set_takeoff_altitude(flying_alt)
-        # await asyncio.sleep(1)
-        #
-        # print("# -- Taking off")
-        # await self.drone.action.takeoff()
-        # await asyncio.sleep(10)
+        print("# -- Arming")
+        await self.drone.action.arm()
+        await self.drone.set_maximum_speed(20)
+        # flying_alt = self.absolute_altitude + 10.0
+        flying_alt = 5.0
+        await self.drone.action.set_takeoff_altitude(flying_alt)
+        await asyncio.sleep(1)
+
+        print("# -- Taking off")
+        await self.drone.action.takeoff()
+        await asyncio.sleep(10)
 
         try:
             print("# -- Starting offboard mode")
@@ -308,7 +313,6 @@ class DroneClient:
                 await self.drone.offboard.set_velocity_body(VelocityBodyYawspeed(0.0, 0.0, 0.0, 0.0))
                 await asyncio.sleep(1)
 
-
                 if ch == 'e':
                     await self.go_forward()
                 elif ch == 'd':
@@ -331,8 +335,8 @@ class DroneClient:
                     pass
         await asyncio.sleep(0.2)
 
-        # await self.drone.action.land()
-        # await asyncio.sleep(10)
+        await self.drone.action.land()
+        await asyncio.sleep(10)
         await self.drone.action.disarm()
         await asyncio.sleep(5)
 
@@ -347,12 +351,10 @@ class DroneClient:
         print("### --- Start Drone Mode 5 : Detection and Following Mode")
         await asyncio.sleep(0.01)
 
-        # while entering command
-        ## 1) get detection information from server (bounding box,
-
+        # TODO : Person Detection mode
+        ## 1) get detection information from server
         ## 2) determine drone how to move
-
-        # 3) end
+        ## 3) end
 
         self.lock.acquire()
         self.data.control_mode = 0
@@ -363,8 +365,11 @@ class DroneClient:
     async def recognize_person(self):
         print("### --- Start Drone Mode 6 : recognition person")
         await asyncio.sleep(0.01)
-        pass
-        # 1) get information from data
+
+        # TODO : Person recognition mode
+        ## 1) get detection information from server
+        ## 2) determine drone how to move
+        ## 3) end
 
         self.lock.acquire()
         self.data.control_mode = 0

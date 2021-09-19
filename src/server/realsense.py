@@ -37,8 +37,8 @@ class RealSenseServer:
 
                 frame = cv2.imdecode(data, cv2.IMREAD_COLOR)
 
+                # push to frame queue
                 self.frame_queue.push(frame)
-                #cv2.waitKey(5)
 
                 print("#Realsense# Job finished {}".format(time.time() - st))
 

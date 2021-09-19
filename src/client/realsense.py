@@ -13,9 +13,11 @@ class RealSenseClient:
         self.port = 8485
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
+        # pipeline and configuration instance
         self.pipeline = rs.pipeline()
         self.config = rs.config()
 
+        # Device information
         self.wrapper = rs.pipeline_wrapper(self.pipeline)
         self.profile = self.config.resolve(self.wrapper)
         self.device = self.profile.get_device()
@@ -24,24 +26,27 @@ class RealSenseClient:
         self.isRun = False
 
     def run(self):
-        # 1920x1080 - 30, 15, 6 fps / 1280x720 - 60, 30, 15, 6 fps / 960x540 - 60, 30, 15, 6 fps
+        # realsesnse L515 camera specification
+        # 1920x1080 - 30, 15, 6 fps
+        # 1280x720 - 60, 30, 15, 6 fps
+        # 960x540 - 60, 30, 15, 6 fps
         width, height, fps = 960, 540, 15
-        # self.config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
-        self.config.enable_stream(rs.stream.color, width, height, rs.format.bgr8, fps)
+        self.config.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)         # depth
+        self.config.enable_stream(rs.stream.color, width, height, rs.format.bgr8, fps)  # color
 
-        self.pipeline.start(self.config)
-        self.pipeline.wait_for_frames()
+        self.pipeline.start(self.config)        # start pipeline
+        self.pipeline.wait_for_frames()         # skip initial frames
 
         self.isRun = True
         t = threading.Thread(target=self.thread)
-        t.daemon = True
-        t.start()
+        t.daemon = True                         # thread daemonize -> True
+        t.start()                               # thread start
 
     def thread(self):
         print("-------- {} start".format(self.host_name))
-        encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 90]
+        encode_param = [int(cv2.IMWRITE_JPEG_QUALITY), 90]      # encoding parameter(type, quality(max : 100))
 
-        self.sock.connect((self.host, self.port))
+        self.sock.connect((self.host, self.port))               # connect to host
 
         time.sleep(0.001)
         while self.isRun:

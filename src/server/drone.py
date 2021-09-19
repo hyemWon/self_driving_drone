@@ -18,7 +18,6 @@ class DroneServer:
         self.isRun = False
 
     def run(self):
-        # depth setting
         self.isRun = True
         t = threading.Thread(target=self.thread)
         t.daemon = True

@@ -64,8 +64,6 @@ class ImageProcessor:
                                       self.obstacle_detection(obstacle_frame))
 
         if result[0] is not None:
-            # cropping person image
-
             x1, y1, x2, y2 = result[0][1][0], result[0][1][1], result[0][1][2], result[0][1][3]
             x1, x2 = int(x1 * 1.6), int(x2 * 1.6)
             y1, y2 = int(y2 * 1.2), int(y2 * 1.2)
@@ -81,7 +79,7 @@ class ImageProcessor:
             pass
 
         self.result_video_writer.video_write(frame)
-        cv2.imshow("boxing result", frame)
+        # cv2.imshow("boxing result", frame)
         cv2.waitKey(1)
         print(f'#IM# {time.time() - st}', result)
         # await asyncio.gather(self.person_processing(results[0]),
@@ -94,7 +92,6 @@ class ImageProcessor:
         except Exception as e:
             print(f'# person detection error\n## {e}')
             return None
-        # return None
 
     async def pose_detection(self, frame):
         try:
@@ -102,7 +99,6 @@ class ImageProcessor:
         except Exception as e:
             print(f'# person detection error\n## {e}')
             return None
-        # return []
 
     async def obstacle_detection(self, frame):
         return None

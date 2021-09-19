@@ -11,7 +11,7 @@ from util.firebase import FireBase
 class ManageServer:
     def __init__(self):
         self.rs_server = RealSenseServer()
-        # self.seek_thermal_server = SeekThermalServer()
+        self.seek_thermal_server = SeekThermalServer()
         self.drone_server = DroneServer()
         self.processor = ImageProcessor()
 
@@ -24,7 +24,7 @@ class ManageServer:
     def run(self):
         remove_all_img()                # remove rgb/depth/thermal/alpha-pose/person image
         self.rs_server.run()            # realsense thread start
-        # self.seek_thermal_server.run()  # seek_thermal thread start
+        self.seek_thermal_server.run()  # seek_thermal thread start
         self.drone_server.run()         # drone thread start
         self.processor.run()
 

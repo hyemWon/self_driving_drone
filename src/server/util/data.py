@@ -53,9 +53,3 @@ class FrameQueue(Singleton):
         self.lock.release()
 
         return data
-
-
-# class ProcessData(Singleton):
-#     def __init__(self):
-#         self.detection_is_run = Value('i', 0, True)
-#         self.

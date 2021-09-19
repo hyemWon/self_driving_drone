@@ -37,10 +37,6 @@ class SeekThermalServer:
 
                 frame = cv2.imdecode(data, cv2.IMREAD_GRAYSCALE)
 
-                # cv2.imshow('Seek thermal frame ', frame)
-
-                # TODO: Add Image Processor
-
                 # TODO: Send to Data Queue
 
                 cv2.imwrite("imgs/thermal/frame_{}.jpg".format(cnt), frame)
