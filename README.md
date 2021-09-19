@@ -120,7 +120,6 @@ self-drving-drone
 
 ## Drone Hardware Specification
 
----
 
 - Drone Frame : [GSN 750](https://smartstore.naver.com/itssg/products/5164489850)
 - Flight Controller - Pixhawk 4
