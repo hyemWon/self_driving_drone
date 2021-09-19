@@ -1,6 +1,5 @@
 # Safe Return Home Service With Self-Driving Drone
 
----
 
 Safe return home service using self-driving drone (2021. 07. 26 ~ 2021. 09. 03)
 
@@ -10,7 +9,6 @@ Last updated at 2021.9.19
 
 ## Implements In Project
 
----
 
 - **Computer Vision Develeopments**
     - **Person detection & tracking** using SSD Mobile-Net v3
@@ -27,7 +25,6 @@ Last updated at 2021.9.19
 
 ### Prerequisites
 
----
 
 - server
     - Python 3.6+
@@ -50,7 +47,6 @@ Last updated at 2021.9.19
 
 ## Directory Structures
 
----
 
 - examples : tests and examples
 - flutter : flutter
@@ -141,7 +137,6 @@ self-drving-drone
 
 ## **Team members**
 
----
 
 - Deep Learning
     - [Hyewon, Jeong](https://github.com/hyemWon) : Team leader, Violence detection and User Authentication
@@ -155,7 +150,6 @@ self-drving-drone
 
 ## References
 
----
 
 - You Only Look Once: Unified, Real-Time Object Detection (Propose by Joseph Redmon , Santosh Divvala, Ross Girshick, Ali Farhadi at CVPR 2016)
 - SSD: Single Shot MultiBox Detector (Propose by Wei Liu, Dragomir Anguelov, Dumitru Erhan, Christian Szegedy, Scott Reed, Cheng-Yang Fu, Alexander C. Berg at CVPR 2016)
